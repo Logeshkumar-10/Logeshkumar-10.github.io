@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Ten-Minute Measure Change, a Day of Checking: See Every Report It Touches with Obsidian and Power BI | Logeshkumar Sivakumar</title>
+  <meta name="description" content="&quot;Can you tweak how Escrow Balance is calculated? Should be quick.&quot;" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Article</span>
+    <h1>A Ten-Minute Measure Change, a Day of Checking: See Every Report It Touches with Obsidian and Power BI</h1>
+    <p class="muted">Logeshkumar Sivakumar · October 28, 2026 · 8 min read</p>
+    <img class="cover" src="../assets/blog/a-ten-minute-measure-change-a-day-of-checking-see-every/cover.jpg" width="1200" height="675" alt="" />
+<p>"Can you tweak how Escrow Balance is calculated? Should be quick."</p>
+<p>The DAX edit takes ten minutes. The rest of the day goes on everything around it. Which measures call this one? Which tables does it read? Which reports show it, and on which pages? Who opens those reports first thing tomorrow?</p>
+<p>Writing the change is the easy part. Proving it breaks nothing is the real work, and in a large Power BI project nobody can answer those questions from memory. <a href="https://www.linkedin.com/showcase/microsoftpowerbi/" target="_blank" rel="noopener"><strong>Power BI</strong></a> Desktop shows you one report at a time. Nothing shows the team the whole chain at once.</p>
+<p>So I built that view for a 39-report project, using <a href="https://www.linkedin.com/company/obsidianmd/" target="_blank" rel="noopener"><strong>Obsidian</strong></a> and <a href="https://www.linkedin.com/showcase/claude/" target="_blank" rel="noopener"><strong>Claude</strong></a> . It runs on a local folder and costs nothing.</p>
+<h2>What is Obsidian?</h2>
+<p><a href="https://www.linkedin.com/company/obsidianmd/" target="_blank" rel="noopener"><strong>Obsidian</strong></a> is a note-taking app built on plain Markdown files. A vault is just a folder on your computer. Notes link to each other with [[wiki-links]], and Obsidian turns those links into an interactive graph you can click, drag and filter. It also has Canvas, a whiteboard where each card can be a real file.</p>
+<p>Three things make it a good fit for Power BI work:</p>
+<ul><li><strong>It's local.</strong> The vault never leaves your machine unless you choose to sync it.</li><li><strong>It's free,</strong> including for work use. Obsidian made its commercial licence optional in 2025.</li><li><strong>It's plain text.</strong> Every note is a Markdown file, so it can sit in git next to your PBIP project.</li></ul>
+<figure><img src="../assets/blog/a-ten-minute-measure-change-a-day-of-checking-see-every/image1.jpg" alt="" loading="lazy"><figcaption>Every table, column, measure and report in a 39-report Power BI project, as one linked graph in Obsidian.</figcaption></figure>
+<h2>Why PBIP makes this possible</h2>
+<p>When you save a report as a Power BI Project (PBIP), the semantic model is written as TMDL and each report as PBIR. Both are readable text: every table, column, measure, page and visual is a file you can open.</p>
+<p>That means a script can read the whole project and work out who uses what. Which columns a visual read, which measures a page shows, and which tables each measure depends on, following measures that call other measures.</p>
+<h2>What I built</h2>
+<figure><img src="../assets/blog/a-ten-minute-measure-change-a-day-of-checking-see-every/image2.jpg" alt="" loading="lazy"><figcaption>Plain-text Power BI files in, linked Markdown Notes out, browsed in a free local obsidian vault</figcaption></figure>
+<p>Two maps, both generated from the PBIP folder by a script Claude wrote for me:</p>
+<p><strong>1. A lineage map in four levels.</strong> Semantic model → tables → columns and measures → reports. About 950 notes, each linked one level down.</p>
+<figure><img src="../assets/blog/a-ten-minute-measure-change-a-day-of-checking-see-every/image3.jpg" alt="" loading="lazy"><figcaption>Every link point one level down, so any node shows what feeds it and what it feeds</figcaption></figure>
+<p><strong>2. An architecture map</strong> of the project itself: the design rules, the model scripts, the report generator and the 39 report specs, laid out left to right as an Obsidian canvas.</p>
+<figure><img src="../assets/blog/a-ten-minute-measure-change-a-day-of-checking-see-every/image4.jpg" alt="" loading="lazy"><figcaption>Each card on the canvas is a real project file. Click one to open it.</figcaption></figure>
+<h2>How it works in practice</h2>
+<p>Open any measure and its local graph shows exactly two things: the tables it reads and the reports that use it.</p>
+<figure><img src="../assets/blog/a-ten-minute-measure-change-a-day-of-checking-see-every/image5.gif" alt="" loading="lazy"><figcaption>The Revenue measure reads Fact Financial, Dim Account and Dim Scenario, and feeds four reports. Drag any node and its links follow.</figcaption></figure>
+<p>Click your way down from the model to a single report. Each click re-centres the graph on the node you chose and pulls its neighbours around it.</p>
+<figure><img src="../assets/blog/a-ten-minute-measure-change-a-day-of-checking-see-every/image6.gif" alt="" loading="lazy"><figcaption>Semantic model → Fact Escrow → Escrow Balance → the Escrow Position report and everything it uses.</figcaption></figure>
+<p>Zoom out and the whole project is one picture, coloured by level: tables by type, measures in pink, columns in grey, reports by business area. Even at that scale you can pick out a single change.</p>
+<figure><img src="../assets/blog/a-ten-minute-measure-change-a-day-of-checking-see-every/image7.gif" alt="" loading="lazy"><figcaption>Out of about 950 nodes, Escrow Balance and Escrow Position are highlighted. Hover the report and everything it depends on lights up. Hover the measure and you see only its tables and its one report.</figcaption></figure>
+<p>The canvas version puts the same lineage into strict columns, which works well on a big screen in a design review.</p>
+<figure><img src="../assets/blog/a-ten-minute-measure-change-a-day-of-checking-see-every/image8.jpg" alt="" loading="lazy"><figcaption>Lineage Canvas</figcaption></figure>
+<h2>From the graph to the real report</h2>
+<p>The map is only useful if it leads back to the report people actually use. Every report note ends with an "Open in Power BI Desktop" link, so the step from "this measure feeds Escrow Position" to looking at Escrow Position takes one click.</p>
+<figure><img src="../assets/blog/a-ten-minute-measure-change-a-day-of-checking-see-every/image9.gif" alt="" loading="lazy"><figcaption>From the Escrow Position note in Obsidian to the live report in Power BI Desktop, where the Escrow balance tile shows the measure in use.</figcaption></figure>
+<p>That's the check a reviewer needs before approving a change: see the dependency, open the report, look at the visual that will move.</p>
+<h2>How to build it</h2>
+<ol><li><strong>Save the project as PBIP.</strong> In Power BI Desktop, use File → Save as → Power BI Project. Keep the model in TMDL format.</li><li><strong>Create a local vault.</strong> In Obsidian, choose "Open folder as vault" and point it at an empty folder.</li><li><strong>Link the project into the vault.</strong> I used Windows folder junctions, so notes can link to the real TMDL and script files without copying them.</li><li><strong>Ask Claude to generate the notes.</strong> My prompt was close to this: <em>"Create one Markdown note per table, column, measure and report. Read the TMDL for tables and measures, and the PBIR visuals for what each report uses. Link each note to the level below it, tag each note with its level, and write it as a script I can re-run."</em></li><li><strong>Colour and filter the graph.</strong> Colour groups by tag (tables, columns, measures, reports by area) and a filter so the graph shows only the lineage folder.</li><li><strong>Dock the local graph</strong> beside your notes. Whatever you click becomes the centre, with its direct links around it.</li><li><strong>Re-run after every change.</strong> The script rebuilds every note and link in a few seconds.</li></ol>
+<p>For the architecture map I asked for one note per script and a JSON Canvas file arranged left to right by data flow. Claude checked the canvas format against the published JSON Canvas spec before writing it.</p>
+<h2>How it helps a team</h2>
+<ul><li><strong>Impact analysis before a change.</strong> Open the measure and see every report to re-test, before anyone edits DAX.</li><li><strong>Faster onboarding.</strong> A new developer can explore the model visually instead of reading 900 measures in a list.</li><li><strong>Better code reviews.</strong> When a pull request touches a measure or column, reviewers can see the blast radius in one click.</li><li><strong>Cleanup.</strong> The map showed 12 tables that no report uses, which are candidates to remove.</li><li><strong>Living documentation.</strong> The notes come from the files themselves, so they never drift from the project.</li></ul>
+<h2>Limits worth knowing</h2>
+<p>It's a snapshot, not a live connection, so it reflects the PBIP files as they were when you last ran the script. With hundreds of measures the full graph is dense, which is why the local graph is the main way to browse. And it maps what the files reference: a dynamic measure that switches by slicer selection is linked to everything it can return.</p>
+<h2>Where this fits</h2>
+<p>This pays off once a model is shared by more than one developer, or more than a handful of reports depend on it. Think of a regional team in Singapore maintaining one finance model for several APAC markets: before changing a margin measure, the developer can show the reviewer exactly which country reports it touches. The vault holds only names and links (no data rows), so it raises no PDPA concerns about the underlying data.</p>
+<p>There are browser-based lineage explorers for PBIP projects, and they're useful. I couldn't find anyone mapping a Power BI project into Obsidian, where the map sits next to the team's own notes, decisions and design rules, and works offline for free.</p>
+<p>The edit will always be the quick part. The map makes the checking quick too.</p>
+<p>Captions are auto generated</p>
+<p>Play</p>
+<p>Obsidian Workflow</p>
+<h2>Previous in this Series: An Al-Assisted Workflow for Real Business Reporting: Beyond Dashboards</h2>
+<h2>A Note on AI-Assisted Workflows</h2>
+<p>Every file this pipeline produces goes through manual review before it is used in a demo. The dataset, bim structure, DAX logic, relationships, measure descriptions, page layout, visual types and report interaction options are validated against the actual dataset and use case before deployment.</p>
+<p>AI compresses the time between starting and having something to review - it does not replace the review itself. Always validate before sharing. The output is a strong starting point, not a finished product.</p>
+<p>For teams exploring industry-specific analytics at scale, there's plenty more to discuss. 💬</p>
+<h2>Previous in this Series: An Al-Assisted Workflow for Real Business Reporting: Beyond Dashboards</h2>
+<h2>References</h2>
+<ul><li>Previous in this Series: <a href="https://www.linkedin.com/pulse/what-happens-when-you-stop-building-sample-dashboards-sivakumar-ng6qc/" target="_blank" rel="noopener"><strong>An Al-Assisted Workflow for Real Business Reporting: Beyond Dashboards</strong></a></li><li>Power BI Desktop projects (PBIP): <a href="http://learn.microsoft.com/en-us/power-bi/developer/projects/projects-overview" target="_blank" rel="noopener"><strong>learn.microsoft.com/en-us/power-bi/developer/projects/projects-overview</strong></a></li><li>Tabular Model Definition Language (TMDL): <a href="http://learn.microsoft.com/en-us/analysis-services/tmdl/tmdl-overview" target="_blank" rel="noopener"><strong>learn.microsoft.com/en-us/analysis-services/tmdl/tmdl-overview</strong></a></li><li>Obsidian is free for work: <a href="http://obsidian.md/blog/free-for-work" target="_blank" rel="noopener"><strong>obsidian.md/blog/free-for-work</strong></a></li></ul>
+<p>#PowerBI #PBIP #TMDL #Obsidian #DataModeling #SemanticModel #BusinessIntelligence #DAX #ClaudeAI #KnowledgeGraph</p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

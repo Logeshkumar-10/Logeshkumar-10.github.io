@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Turning Company Domains into Ready-to-Use B2B Data using N8N | Logeshkumar Sivakumar</title>
+  <meta name="description" content="Manually turning a list of domains or emails into B2B company details is slow, repetitive, and hard to keep consistent. Manual research doesn’t scale. To a" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Article</span>
+    <h1>Turning Company Domains into Ready-to-Use B2B Data using N8N</h1>
+    <p class="muted">Logeshkumar Sivakumar · January 1, 2026 · 4 min read</p>
+    <img class="cover" src="../assets/blog/turning-company-domains-into-ready-to-use-b2b-data-using-n8n/cover.jpg" width="1200" height="675" alt="" />
+<p>Manually turning a list of domains or emails into B2B company details is slow, repetitive, and hard to keep consistent. Manual research doesn’t scale. To avoid all that copy-paste work, this workflow uses n8n and an AI agent to automatically generate structured company profiles - name, industry, revenue, employees, country, and source details directly from those raw inputs.</p>
+<h2>What is an AI Agent?</h2>
+<p>An AI agent is a small system around a language model: it gets a clear role, rules, and tools, then returns structured output instead of free text. In this setup, the agent takes a domain or email and produces company name, industry, revenue (USD), employees, country, year, and revenue source details that other systems can consume safely.</p>
+<h2>What is n8n?</h2>
+<p><a href="https://n8n.io/" target="_blank" rel="noopener"><strong>n8n</strong></a> is a workflow automation platform that connects APIs, databases, and AI models in a visual editor and can be self-hosted. It handles triggers, loops, retries, and output parsing, so the agent behaves like a reliable internal service instead of a one-off script living in someone’s notebook.</p>
+<h2>What this B2B Enrichment Workflow Does</h2>
+<p>The workflow focuses on turning raw domains/emails into structured company data:</p>
+<ul><li>Triggers manually (or on a schedule) to start a new enrichment run.</li><li>Downloads the input Excel file and converts it into JSON items.</li><li>Loops over each item with a Split in Batches / Loop Over Items pattern for stability and rate-limit control.</li><li>Calls the AI agent node wired to an external model and passes the enrichment prompt plus the current domain/email.</li><li>Feeds the raw model output into a Structured Output Parser node that validates the JSON against a predefined schema.</li><li>Uses a final Set node to normalize field names and then a Convert-to-File node to export the enriched results.</li></ul>
+<figure><img src="../assets/blog/turning-company-domains-into-ready-to-use-b2b-data-using-n8n/image1.jpg" alt="" loading="lazy"><figcaption>N8N Data Enrichment Workflow</figcaption></figure>
+<h2>The Prompt Behind the AI Agent</h2>
+<p>The AI agent is driven by a carefully designed prompt that focuses on <strong>accurate revenue and clean structure</strong>, not just “best guess” text. At a high level, the prompt instructs the model to:</p>
+<ul><li>Treat every non-free mail domain (anything except gmail/outlook/hotmail/yahoo/icloud) as a company and return full firmographic data.</li><li>Prioritise official sources (annual reports, 10-K/20-F, regulatory filings) for revenue, then fall back to investor pages or reputable financial databases only when needed.</li><li>Use only top-line revenue fields (e.g. “Total revenue”, “Net sales”) for a single fiscal year, with clear rules for units, currency conversion to USD, and year selection.</li><li>Always output strict JSON with fixed keys (Domain, Company Name, Industry, Company Revenue in USD, Employees, Country, Year, Revenue Source, Revenue Source URL, Revenue Reliability), so n8n can parse it safely.</li></ul>
+<p>This prompt design is what makes the workflow useful for analytics tools like Power BI: you get machine-readable, source-backed numbers instead of unstructured AI guesses.</p>
+<h2>How to Implement it</h2>
+<h2>Cloud</h2>
+<ul><li>Used <a href="https://hub.docker.com/r/n8nio/n8n" target="_blank" rel="noopener"><strong>n8n</strong></a><strong> </strong>as the AI automation layer: visual workflow, looping, error handling, and structured output parsing.</li><li>Self-hosted n8n on <a href="https://render.com/" target="_blank" rel="noopener"><strong>Render</strong></a> to scale up or down without managing servers directly.</li><li>Used <a href="http://cron-job.org/" target="_blank" rel="noopener"><strong>cron-job.org</strong></a> to ping the Render service on a schedule and keep the instance warm.</li><li>Called free/low-cost models via <a href="https://openrouter.ai/" target="_blank" rel="noopener"><strong>OpenRouter</strong></a>, currently using <a href="https://openrouter.ai/kwaipilot/kat-coder-pro:free" target="_blank" rel="noopener"><strong>Kwaipilot: KAT-Coder-Pro V1</strong></a> as the main model for the enrichment agent.</li><li>Wrapped everything in a strict JSON schema so downstream tools can trust the format.</li></ul>
+<h2>On-Prem</h2>
+<ul><li>Install Node.js (version 20 LTS recommended) from <a href="http://nodejs.org/" target="_blank" rel="noopener"><strong>nodejs.org</strong></a></li><li>Open Command Prompt or PowerShell</li><li>Run: npx n8n start (no global install needed)</li><li>Access n8n at through Localhost link provided in your browser</li><li>Create your first workflow. No admin access or PATH changes required</li><li>Global install alternative (It requires admin access)</li></ul>
+<p>npm install -g n8n </p>
+<p>n8n</p>
+<h2>How it Helps</h2>
+<p>Most B2B teams still spend hours googling companies, skimming “About” pages, Wikipedia, ChatGPT/Copilot and copying numbers into spreadsheets - a process that is slow, inconsistent, and hard to audit later. This workflow changes that:</p>
+<ul><li><strong>Less manual research</strong>: a domain list becomes an enriched dataset in a single run instead of hours of tab-hopping.</li><li><strong>More consistent revenue data</strong>: the agent always follows the same rules about filings, fallback sources, and allowed revenue lines.</li><li><strong>Traceability</strong>: every record includes a revenue source description, URL, and reliability score, so values are reviewable and overridable.</li><li><strong>Easy integration</strong>: the output is a structured file (CSV/XLSX), ready to drop into existing CRMs, marketing tools, or data warehouses.</li></ul>
+<p>If you’re working with messy company lists and spending too much time cleaning data before it ever reaches Power BI, this kind of enrichment layer can sit quietly in the background and do the heavy lifting for you. It won’t replace your models or reports, but it can give them far better inputs.</p>
+<p>If this resonates with the problems you’re trying to solve enriching domains, improving lead scoring, or just getting more trustworthy firmographics into your dashboards feel free to reach out. Always happy to compare approaches, exchange ideas, or even co-build similar workflows tailored to your stack.</p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

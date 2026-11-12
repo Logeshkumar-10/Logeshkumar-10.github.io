@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How the Microsoft Fabric Lakehouse Actually Works Inside | Logeshkumar Sivakumar</title>
+  <meta name="description" content="Most teams that start with a Microsoft Fabric Lakehouse make the same mistake. They upload files, point a report at them, and call the pipeline done. Weeks" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Fabric Foundations · Part 2</span>
+    <h1>How the Microsoft Fabric Lakehouse Actually Works Inside</h1>
+    <p class="muted">Logeshkumar Sivakumar · August 4, 2026 · 4 min read</p>
+    <img class="cover" src="../assets/blog/fabric-foundations-2/cover.jpg" width="1200" height="675" alt="" />
+<p>Most teams that start with a <a href="https://www.linkedin.com/showcase/microsoftfabric/" target="_blank" rel="noopener"><strong>Microsoft Fabric</strong></a> Lakehouse make the same mistake. They upload files, point a report at them, and call the pipeline done. Weeks later, queries are slow, data is inconsistent, and nobody can explain which version of a table is the real one. The problem is not the Lakehouse. The problem is not understanding what the Lakehouse is made of before putting data into it.</p>
+<h2>What are the two halves of a Microsoft Fabric Lakehouse?</h2>
+<p>A <strong>Lakehouse </strong>in Microsoft Fabric has two distinct areas. The <strong>Files </strong>area is the unmanaged side. Any format lands here: CSV, JSON, Parquet, images, logs. Files is the landing zone for raw, as-ingested data organized in folders. The <strong>Tables </strong>area is the managed side. Structured data lives here as Delta tables, which Spark and the SQL analytics endpoint query as relational tables.</p>
+<p>The flow is directional: raw data lands in Files, gets transformed, and the cleaned result becomes a managed Delta table in Tables. Fabric provides a built-in Load to Tables action that reads a file and writes it out as a managed Delta table. Reporting should always read from Tables, never directly from Files.</p>
+<h2>Why does the SQL analytics endpoint matter, and what can it not do?</h2>
+<p>Every Lakehouse automatically gets a <strong>SQL analytics endpoint</strong>. The SQL analytics endpoint is a read-only T-SQL query surface over the Lakehouse's Delta tables, provided by Microsoft Fabric for ad-hoc analysis, views, and serving Power BI. The key constraint: the <strong>SQL analytics endpoint</strong> cannot write. <strong>No INSERT, No UPDATE, No Transactions</strong>. </p>
+<p>To <strong>transform data</strong> inside a Lakehouse, use <strong>Spark notebooks</strong>. To run T-SQL writes and full transactions, use a Warehouse instead. Getting this boundary wrong leads teams to build workarounds that Fabric already solves with a different item.</p>
+<h2>When should you Shortcut instead of copy?</h2>
+<p><strong>OneLake</strong> <strong>Shortcuts</strong> make data appear inside a Lakehouse without moving it. <strong>Internal shortcuts </strong>point to data in another Lakehouse, Warehouse, or workspace within the same OneLake. <strong>External shortcuts </strong>point to storage outside Fabric, such as Amazon S3, Azure Data Lake Storage Gen2, or Google Cloud Storage. </p>
+<p>The rule: default to a shortcut. Copies drift out of sync, consume extra storage, and require pipeline maintenance. Reach for a physical copy only when you need isolation, a different refresh cadence, or heavy transformation that should not touch the source. When a partner drops files daily into an S3 bucket, the strong answer is an external OneLake shortcut to that S3 path, not a scheduled copy job.</p>
+<h2>How does the medallion layout tie the Lakehouse together?</h2>
+<p>Medallion is not a Fabric feature to switch on. Medallion is a design pattern applied to the Lakehouse to separate data by quality. <strong>Bronze </strong>holds raw, as-ingested data, a faithful history you can reprocess from. <strong>Silver </strong>holds cleaned, conformed, de-duplicated data shaped into usable entities. <strong>Gold </strong>holds business-ready star schemas and aggregates shaped for reporting. The reason medallion works: if a transformation breaks, the raw data in bronze is untouched, and silver and gold can be rebuilt. Every consumer gets a clear contract: analysts read from gold, engineers debug from bronze.</p>
+<h2>The decision that saves months of rework</h2>
+<p>A <strong>Lakehouse </strong>that separates raw landing from curated tables, respects the read-only boundary of the SQL analytics endpoint, uses shortcuts instead of copies, and structures data into bronze, silver, and gold layers is a Lakehouse that scales without surprises. Getting these four decisions right on day one is the difference between a clean pipeline and a rebuild.</p>
+<p>Previous in this series: <a href="https://www.linkedin.com/pulse/fabric-foundations-mental-model-behind-microsoft-sivakumar-zbwzc/" target="_blank" rel="noopener"><strong>The Mental Model Behind Microsoft Fabric</strong></a></p>
+<h2>References:</h2>
+<ol><li>What is a Lakehouse in Microsoft Fabric? <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview" target="_blank" rel="noopener"><strong>https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview</strong></a></li><li>What is the SQL analytics endpoint for a Lakehouse? <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-sql-analytics-endpoint" target="_blank" rel="noopener"><strong>https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-sql-analytics-endpoint</strong></a></li><li>OneLake shortcuts:<strong> </strong><a href="https://learn.microsoft.com/en-us/fabric/onelake/onelake-shortcuts" target="_blank" rel="noopener"><strong>https://learn.microsoft.com/en-us/fabric/onelake/onelake-shortcuts</strong></a></li></ol>
+<p>#MicrosoftFabric #Lakehouse #OneLake #DeltaLake #SQLAnalyticsEndpoint #DataEngineering #MedallionArchitecture #PowerBI</p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

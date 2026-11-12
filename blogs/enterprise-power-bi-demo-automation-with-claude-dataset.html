@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise Power BI Demo Automation with Claude - Dataset Generation, Semantic Modelling, and DAX in One Session | Logeshkumar Sivakumar</title>
+  <meta name="description" content="No enterprise client is convinced by generic data. Building a convincing Power BI demo involves two separate problems." />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Article</span>
+    <h1>Enterprise Power BI Demo Automation with Claude - Dataset Generation, Semantic Modelling, and DAX in One Session</h1>
+    <p class="muted">Logeshkumar Sivakumar · May 12, 2026 · 6 min read</p>
+    <img class="cover" src="../assets/blog/enterprise-power-bi-demo-automation-with-claude-dataset/cover.jpg" width="1200" height="675" alt="" />
+<p>No enterprise client is convinced by generic data. Building a convincing Power BI demo involves two separate problems.</p>
+<p><strong>First: </strong>Creating industry-specific data that reflects the client's actual business - realistic P&amp;L accounts, regional demand patterns, multi-entity structures, and variance that makes sense.</p>
+<p><strong>Second: </strong>Building a semantic model behind that data - relationships, DAX measures, display folders, descriptions. Together, they consumed 6–8 hours every time a new demo was needed. With multiple client verticals to cover and a lean team, that time adds up fast.</p>
+<p>I automated both steps with Claude.</p>
+<h2>Who This Is For</h2>
+<p>This is relevant if you prepare Power BI demos for enterprise clients, run a lean BI team across multiple functions, or handle pre-sales preparation alongside delivery work. If you start from scratch for every engagement, this changes that.</p>
+<h2>What This Skill Do</h2>
+<p>Claude can be given a saved set of instructions - a reusable file that tells it exactly how to approach a specific task, what rules to follow, and what to deliver. Think of it as writing an SOP your assistant reads and applies consistently, every session, without being re-explained.</p>
+<p>I built two such instruction sets that work as a connected pipeline:</p>
+<ul><li><strong>Demo Dataset Creator </strong>- generates transaction-level data files for any industry. It applies realism rules that most generated datasets skip: no macro-region as a leaf node, country-level naming conventions matched to local demographics, regional product demand patterns, seasonal variation, and zero reconciliation errors across all connected value pairs - actuals vs plan, inventory in vs out. Alongside the data, it produces structured documentation files describing every table, column, and account in detail.</li><li><strong>Model Builder</strong> - reads both the data files and the documentation the Dataset Creator produced, then generates a complete, deploy-ready Power BI semantic model (a semantic model is the data structure behind a Power BI report it defines tables, relationships, and DAX calculations, description, Organise Measure as tables ready to create report).</li></ul>
+<figure><img src="../assets/blog/enterprise-power-bi-demo-automation-with-claude-dataset/image1.jpg" alt="" loading="lazy"><figcaption>Skill 01 writes. Skill 02 reads. The documentation in the middle is what separates a functional model from an accurate one.</figcaption></figure>
+<h2>Why This Exists</h2>
+<p>My role covers internal BI reporting, sales support, QA and demo preparation - functions previously distributed across a larger team. Demo files are a recurring requirement: for the company website and for enterprise client presentations. What used to take 6–8 hours of manual work per engagement - dataset design, model build, DAX, documentation - now completes in under 30 minutes.</p>
+<h2>What the Model Builder Produces</h2>
+<p>Running the skill generates five files in one pass:</p>
+<ul><li><strong>model.bim</strong> - A Tabular Editor 3-compatible file (Tabular Editor is an open-source tool for building and editing Power BI semantic models outside of Power BI Desktop) containing every table, column, relationship, and measure, fully described and ready to deploy</li><li><strong>build_model.py</strong> - The Python script that generates all outputs, rerunnable without starting over</li><li><strong>measures_reference.md</strong> - A reference table listing every measure with its folder, format string, business description, and full DAX (DAX - Data Analysis Expressions is the formula language used to write calculations in Power BI)</li><li><strong>Two documentation files</strong> - A guide for report developers and an internal technical reference</li></ul>
+<h2>How to Deploy Model in Power BI</h2>
+<p><strong>Disable TMDL:</strong> In Power BI Desktop, Go to File &gt; Options and settings &gt; Options &gt; Preview features in Power BI Desktop and ensure “Store semantic model using TMDL format” is unchecked so it uses the .bim structure.</p>
+<p><strong>Save File: </strong>Save the File in Pbip format</p>
+<p><strong>Locate Folder:</strong> Open your .pbip directory on your computer and find the semantic model folder (named [YourProjectName].SemanticModel ).</p>
+<p><strong>Replace File:</strong> Paste your updated .bim file into that folder, making sure it overwrites the existing model.bim file.</p>
+<h2>What Makes the Model Industry-Specific</h2>
+<p>The Model Builder reads the documentation files the Dataset Creator produces before generating a single relationship and measure - a public guide and an internal reference that record every table's purpose, each column's business definition, the full account hierarchy, and the exact scenario names used in the dataset.</p>
+<p>That is what makes the output industry specific, from creating relationship, what measures are created and what they are called. Without that documentation, the Model Builder works from column names alone - functional, but shallow. With it, every measure reflects the actual dataset built for that engagement.</p>
+<p>Measures are organized into numbered display folders - "01 | Revenue", "02 | Margins", "03 | Variance" - each carrying a <strong>business-first description</strong> that states what the measure answers, which direction signals improvement, and the industry benchmark where one exists. These appear as tooltips in Power BI's field list. The documentation the Dataset Creator wrote becomes the intelligence the Model Builder delivers.</p>
+<figure><img src="../assets/blog/enterprise-power-bi-demo-automation-with-claude-dataset/image2.jpg" alt="" loading="lazy"><figcaption>The deployed model in Power BI Desktop — measures organized into numbered display folders, each carrying a business-first industry-named description and ready to use.</figcaption></figure>
+<h2>When to Use This</h2>
+<p>This pattern fits when demo frequency is high and team size is lean. It is not a replacement for production data engineering. For pre-sales demonstrations and internal reporting demos, it removes the model-building step that adds no client-facing value.</p>
+<h2>Real-World Context</h2>
+<p>When I ran this for an APAC enterprise demo, the client's team worked with multi-entity P&amp;L consolidations across regional cost centers - a structure that a generic Contoso dataset cannot reflect. The Dataset Creator produced data aligned to that structure: entity-level variance, multi-currency values, and cost-center breakdowns. The Model Builder read that data and the documentation alongside it, and generated measures named to match their chart of accounts. The demo ran on data that looked like theirs. That change in perception is the difference between a client evaluating a product and a client seeing themselves in it.</p>
+<h2>Conclusion</h2>
+<p>I built this to solve my own problem. What started as a personal fix became a workflow that scales - same quality output regardless of industry, client size, or how many engagements are running in parallel.</p>
+<p>Building something similar or want to compare approaches? Drop a comment or connect -happy to walk through how I structured the pipeline. Find the skill file below.</p>
+<p>🔗 Comment below to receive the <strong>GitHub</strong> repository.</p>
+<h2>A Note on AI-Assisted Workflows</h2>
+<p>Every file this pipeline produces goes through manual review before it is used in a demo. The dataset, bim structure, DAX logic, relationships, and measure descriptions are validated against the actual dataset before deployment.</p>
+<p>AI compresses the time between starting and having something to review - it does not replace the review itself. Always validate before sharing. The output is a strong starting point, not a finished product.</p>
+<h2>Previous in the Series: Building a Solid Foundation: Best Practices for Power BI Data Modeling | LinkedIn</h2>
+<h2>Next in the Series: An Al-Assisted Workflow for Real Business Reporting: Beyond Dashboards | LinkedIn</h2>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

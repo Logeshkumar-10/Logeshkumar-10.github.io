@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What Your Delta Tables Actually Are: Parquet Internals and the Transaction Log in Microsoft Fabric | Logeshkumar Sivakumar</title>
+  <meta name="description" content="You have been writing Delta tables for weeks, maybe months. Then a table slows down, a bad load corrupts your silver layer, or a report breaks overnight. Y" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Fabric Foundations · Part 4</span>
+    <h1>What Your Delta Tables Actually Are: Parquet Internals and the Transaction Log in Microsoft Fabric</h1>
+    <p class="muted">Logeshkumar Sivakumar · August 26, 2026 · 4 min read</p>
+    <img class="cover" src="../assets/blog/fabric-foundations-4/cover.jpg" width="1200" height="675" alt="" />
+<p>You have been writing Delta tables for weeks, maybe months. Then a table slows down, a bad load corrupts your silver layer, or a report breaks overnight. You open the Lakehouse, stare at the table name, and realize you have no idea what is physically inside it. That gap between "I can write saveAsTable" and "I can diagnose what went wrong" is where most Microsoft Fabric practitioners get stuck.</p>
+<p>The answer is almost always in two places: the Parquet file layout or the Delta transaction log.</p>
+<h2>Why Parquet's columnar layout matters when your Delta table is slow</h2>
+<p><strong>Parquet is a columnar file forma</strong>t where all values of a single column are stored together, instead of row by row the way CSV works. That layout gives analytics engines three things: column pruning reads only the columns a query needs, similar values in one column compress far better than mixed row data, and<strong> </strong>Min/Max statistics stored in the file footer let the engine skip entire chunks that cannot match a filter value.</p>
+<p>Inside a single Parquet file, rows are split into <strong>Row Groups</strong> (horizontal slices of roughly one to two million rows). Each row group holds <strong>Column Chunks</strong> (all values for one column), and each chunk breaks into pages where encoding and compression happen. The <strong>Footer </strong>at the end stores the schema and per-column min/max statistics per row group. Those footer statistics are how predicate pushdown works. They are also why file count matters: thousands of tiny Parquet files mean thousands of footers and seek overhead. That small-file problem is exactly what <strong>OPTIMIZE </strong>exists to fix.</p>
+<h2>What the Delta Lake transaction log actually contains</h2>
+<p>A <strong>Delta table</strong> in Microsoft Fabric is not one file. It is a folder of Parquet data files plus a <em>delta</em>log subfolder containing numbered JSON commit files. Each JSON records which Parquet files were added and which were removed by that transaction. To read the table, the engine replays the log and builds the current set of valid files.</p>
+<p>That single mechanism gives you ACID transactions (a write either fully commits or does not), time travel (every commit is a quarriable version via VERSION AS OF), schema enforcement (writes with mismatched columns are rejected by default), and reliable concurrent reads. </p>
+<pre><code>SQL: SELECT * FROM table_name VERSION AS OF 1;
+Pyspark:
+spark.read.format("delta").option("versionAsOf", 0).load(table_path)</code></pre>
+<p>Delta never rewrites a Parquet file in place. It writes new files and logs the change. Old files stay on disk until <strong>VACUUM </strong>removes them.</p>
+<p>This is the part people skip, then spend an afternoon wondering why a table "reverted" after a cleanup they did not understand.</p>
+<h2>Schema enforcement: the default that saves your silver layer</h2>
+<p>Delta rejects writes whose schema does not match the table. That default-safe behavior stops a silent column rename or type change upstream from corrupting everything downstream. When you genuinely need to add a column, you opt in deliberately with "<strong>mergeSchema</strong>" set to true. Enforcement is the safety net. Evolution is the conscious choice.</p>
+<h2>When Parquet internals and the Delta log save you</h2>
+<p>The next time a table is slow, check whether it has thousands of small Parquet files. When a bad load lands, run <strong>DESCRIBE HISTORY</strong> to find the last good version and query it with VERSION AS OF before restoring. When a report breaks after an upstream schema change, Delta's enforcement error tells you exactly what shifted. Every diagnostic path runs through the Parquet layout or the <em>delta</em>log.</p>
+<h2>Previous in this series: Notebook in Microsoft Fabric: Know the PySpark Engine Before You Write the Code</h2>
+<h2>References:</h2>
+<ul><li>Delta Lake overview, Microsoft Fabric (<a href="https://learn.microsoft.com/en-us/fabric/fundamentals/delta-lake-overview" target="_blank" rel="noopener"><strong>Microsoft Learn</strong></a>)</li><li>Lakehouse and Delta tables, Microsoft Fabric (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-and-delta-tables" target="_blank" rel="noopener"><strong>Microsoft Learn</strong></a>)</li><li>Apache Parquet format (<a href="http://parquet.apache.org/" target="_blank" rel="noopener"><strong>parquet.apache.org</strong></a>)</li></ul>
+<p>#DeltaLake #Parquet #MicrosoftFabric #TransactionLog #DataEngineering #PowerBI #OneLake #Lakehouse</p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

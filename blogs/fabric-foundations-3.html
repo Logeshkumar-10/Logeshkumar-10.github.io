@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notebook in Microsoft Fabric: Know the PySpark Engine Before You Write the Code | Logeshkumar Sivakumar</title>
+  <meta name="description" content="Most BI professionals open their first Notebook in Microsoft Fabric without knowing what runs it. No cluster to configure. No infrastructure to manage. The" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Fabric Foundations · Part 3</span>
+    <h1>Notebook in Microsoft Fabric: Know the PySpark Engine Before You Write the Code</h1>
+    <p class="muted">Logeshkumar Sivakumar · August 12, 2026 · 3 min read</p>
+    <img class="cover" src="../assets/blog/fabric-foundations-3/cover.jpg" width="1200" height="675" alt="" />
+<p>Most BI professionals open their first Notebook in Microsoft Fabric without knowing what runs it. No cluster to configure. No infrastructure to manage. The code just works. Until something takes nine minutes instead of three, and you have no mental model for why. That gap starts with the compute engine.</p>
+<h2>What PySpark actually runs on in Microsoft Fabric</h2>
+<p>Apache Spark is an engine that processes data in parallel across multiple machines. When a dataset outgrows one computer, Spark splits it into partitions and processes them simultaneously across a cluster. The cluster has two roles: the <strong>Driver </strong>coordinates work and holds your code, while <strong>Executors </strong>process tasks on their assigned partitions.</p>
+<p>In <a href="https://www.linkedin.com/showcase/microsoftfabric/" target="_blank" rel="noopener"><strong>Microsoft Fabric</strong></a>, you never provision clusters directly. You get two pool types.</p>
+<p>A <strong>Starter poo</strong>l is pre-warmed and starts sessions in seconds, using Medium nodes (8 vCores, 64 GB) with autoscale enabled. For development work, the starter pool handles almost everything. A <strong>Custom pool</strong> lets you choose node sizes and scaling behaviour, but starts slower unless configured as a live pool. You reach for custom pools when you need specific memory, private networking, or workload-level tuning.</p>
+<p>One distinction that trips people up: </p>
+<ul><li><strong>Autoscale </strong>adds or removes whole nodes between a minimum and maximum. </li><li><strong>Dynamic Allocation</strong> adjusts executor count within those nodes based on the job's data volume. They solve different problems at different layers.</li></ul>
+<h2>Why Lazy Evaluation changes how you think about errors</h2>
+<p>PySpark <strong>transformations </strong>like filter, select, and withColumn do not execute when you call them. Spark builds a plan and waits. Only an <strong>action </strong>(show, count, write) triggers actual computation.</p>
+<p>This catches people coming from <a href="https://www.linkedin.com/showcase/microsoftpowerbi/" target="_blank" rel="noopener"><strong>Power BI</strong></a> and DAX off guard. You write five lines of transformation code. No errors. Then you call '.show()' and everything breaks. The error is not in show(). The error lives three lines up, in a filter or a cast that Spark had not evaluated yet.</p>
+<p>Once you expect that delay between writing and executing, you stop hunting in the wrong cell.</p>
+<h2>The four moves behind every PySpark pipeline</h2>
+<p>The PySpark DataFrame API reduces to four operations: read, transform, aggregate, write<strong>.</strong></p>
+<ul><li><strong>Read </strong>a Delta table from your Lakehouse with <a href="http://spark.read/" target="_blank" rel="noopener"><strong>spark.read</strong></a>.table(). </li><li><strong>Transform </strong>by filtering bad rows, trimming text columns, casting types. </li><li><strong>Aggregate </strong>to a summary with groupBy and agg. </li><li><strong>Write back</strong> to a new managed Delta table with saveAsTable().</li></ul>
+<p>That sequence is bronze to silver to gold in code. Joins, window functions, complex aggregations are richer versions of these same four moves. And you can switch to Spark SQL in any notebook cell with <strong>%%sql</strong>. Both approaches share the same Spark session, so a table you wrote with PySpark is immediately queryable with SQL in the next cell.</p>
+<h2>When the pool matters more than the code</h2>
+<p>Clean PySpark on the wrong pool wastes capacity units. The starter pool handles development workloads well. Push production-scale data through the same pool and you hit throttling that no code tuning fixes. Knowing when to move to a custom pool, and which node size fits the job, separates someone who writes PySpark from someone who engineers with it.</p>
+<h2>References:</h2>
+<ol><li>Apache Spark compute for Fabric - <a href="https://learn.microsoft.com/fabric/data-engineering/spark-compute" target="_blank" rel="noopener"><strong>https://learn.microsoft.com/fabric/data-engineering/spark-compute</strong></a></li><li>Develop and run Fabric notebooks - <a href="https://learn.microsoft.com/fabric/data-engineering/author-execute-notebook" target="_blank" rel="noopener"><strong>https://learn.microsoft.com/fabric/data-engineering/author-execute-notebook</strong></a></li><li>Apache Spark Runtimes in Fabric - <a href="https://learn.microsoft.com/fabric/data-engineering/runtime" target="_blank" rel="noopener"><strong>https://learn.microsoft.com/fabric/data-engineering/runtime</strong></a></li></ol>
+<p>Previous in this series: <a href="https://www.linkedin.com/pulse/fabric-foundations-mental-model-behind-microsoft-sivakumar-zbwzc" target="_blank" rel="noopener"><strong>The Mental Model Behind Microsoft Fabric</strong></a> | <a href="https://www.linkedin.com/pulse/how-microsoft-fabric-lakehouse-actually-works-inside-sivakumar-hjyxc" target="_blank" rel="noopener"><strong>How the Microsoft Fabric Lakehouse Actually Works Inside</strong></a></p>
+<p>#PySpark #MicrosoftFabric #SparkCompute #FabricNotebook #DataEngineering #PowerBI #ApacheSpark #DeltaLake</p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

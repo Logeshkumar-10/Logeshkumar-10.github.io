@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fabric Warehouse: What it is for, and when read-only stops being enough | Logeshkumar Sivakumar</title>
+  <meta name="description" content="Microsoft Fabric Warehouse is where you serve with T-SQL. It has the ability to write, and to change several tables as one transaction. Treat it as SQL Ser" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Fabric Foundations · Part 6</span>
+    <h1>Fabric Warehouse: What it is for, and when read-only stops being enough</h1>
+    <p class="muted">Logeshkumar Sivakumar · September 22, 2026 · 4 min read</p>
+    <img class="cover" src="../assets/blog/fabric-foundations-6/cover.jpg" width="1200" height="675" alt="" />
+<p><a href="https://www.linkedin.com/company/microsoft-fabric-world/" target="_blank" rel="noopener"><strong>Microsoft Fabric</strong></a> Warehouse is where you serve with T-SQL. It has the ability to write, and to change several tables as one transaction. Treat it as SQL Server dropped into Fabric and you miss the point, and you also miss why T-SQL writes and multi-table transactions land here and nowhere else in the platform.</p>
+<h2>What is the Microsoft Fabric Warehouse?</h2>
+<p>The <a href="https://www.linkedin.com/showcase/microsoftfabric/" target="_blank" rel="noopener"><strong>Microsoft Fabric</strong></a> <strong>Warehouse</strong> is a fully managed, T-SQL data warehouse that stores its tables as open Delta Parquet in <strong>OneLake</strong> and <strong>supports full writes, multi-table ACID transactions, views, functions, and stored procedures</strong>. Infrastructure management is handled by the service. You do not provision servers, and there are no traditional indexes to tune; performance is managed by the query optimizer and by statistics the engine maintains automatically. Compute is serverless and scales with your capacity, so manual sizing is not required for the default experience. Because the tables remain open Delta on OneLake, other engines in Fabric, including Spark and Power BI, can read them. The managed experience does not cost you the open format.</p>
+<h2>What the Warehouse does that a Lakehouse cannot</h2>
+<p>The defining difference is write capability and transactions, not storage. The Lakehouse SQL analytics endpoint is read-only. To write with T-SQL and to commit changes across several tables as a single unit, you use a Warehouse. Multi-table ACID transactions are the reason finance and operational reporting workloads frequently run in a Warehouse: when a load must update a fact table and its dimension together, a transaction ensures that both changes commit or neither does, so the tables cannot be left in a partial state.</p>
+<figure><img src="../assets/blog/fabric-foundations-6/image1.jpg" alt="" loading="lazy"><figcaption>Key Difference between Warehouse vs Lakehouse</figcaption></figure>
+<p>The storage row is identical for both, which is why the format is not the deciding factor.</p>
+<h2>The T-SQL surface area available in the Warehouse</h2>
+<p>The <strong>Warehouse </strong>provides the T-SQL constructs a SQL developer expects. <strong>CREATE TABLE</strong> defines dimensions and facts, <strong>CREATE TABLE AS SELECT </strong>(<strong>CTAS</strong>) builds curated tables from a query, <strong>Stored procedures</strong> encapsulate reusable loads, and <strong>Views </strong>expose a stable shape for reporting. For ingestion, <strong>COPY INTO</strong> bulk loads files such as Parquet or CSV directly into a table. One behaviour differs from SQL Server and is worth noting: primary and foreign keys are metadata only. They are declared as NOT ENFORCED, so the engine does not reject duplicate or orphan rows. Referential integrity must be enforced in the load logic rather than by the constraint.</p>
+<h2>When to choose the Microsoft Fabric Warehouse</h2>
+<p>Choose a <strong>Warehouse </strong>when the workload is structured, SQL-first, and requires T-SQL writes or transactional updates across multiple tables, or when the team consists of SQL and BI developers rather than Spark engineers. </p>
+<p>Choose a <strong>Lakehouse </strong>when the data is large, mixed, or unstructured and the work is Spark-based engineering. Both stores use open Delta on OneLake, so the storage format is not the deciding factor. The decision rests on the development language, the transactional requirement, and the shape of the data.</p>
+<h2>Serving from the Warehouse without duplicating data</h2>
+<p>A Warehouse does not require its own copy of upstream data to serve it. Because both stores sit on <strong>OneLake</strong>, a Warehouse can query Lakehouse tables in the same workspace using three-part naming, without copying data. A common pattern follows from this: engineer the data in the Lakehouse with Spark, then cross-query or CTAS the curated result into the Warehouse and serve it with T-SQL. Copy data into the Warehouse only when an isolated served version is genuinely required.</p>
+<p>The case for a Microsoft Fabric Warehouse is not that it stores data more efficiently, but that it provides T-SQL writes and multi-table transactions that no other store in Fabric offers. Where a workload depends on those capabilities, the Warehouse is the appropriate choice.</p>
+<p><strong>Fabric Foundations</strong> Newsletter examines one layer of the platform in each edition. Subscribe to receive the next one.</p>
+<p><strong>Previous in this series: </strong><a href="https://www.linkedin.com/pulse/four-delta-maintenance-operations-separate-building-from-sivakumar-03syc/?trackingId=bGxR2xbVSQ6PTnIrNBr4pw%3D%3D" target="_blank" rel="noopener"><strong>The Four Delta Maintenance Operations That Separate Building a Pipeline from Running One</strong></a></p>
+<p><strong>Next in this series</strong>: <a href="https://www.linkedin.com/pulse/sql-database-microsoft-fabric-oltp-store-mirrors-itself-sivakumar-0t0mc/" target="_blank" rel="noopener"><strong>SQL Database in Microsoft Fabric: The OLTP Store That Mirrors Itself into OneLake</strong></a></p>
+<h2>References:</h2>
+<ul><li>What is Fabric Data Warehouse? - <a href="https://learn.microsoft.com/en-us/fabric/data-warehouse/data-warehousing" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a></li><li>Microsoft Fabric decision guide: Choose between Warehouse and Lakehouse - <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/decision-guide-lakehouse-warehouse" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a></li><li>Primary keys, foreign keys, and unique keys in Warehouse in Microsoft Fabric - <a href="https://learn.microsoft.com/en-us/fabric/data-warehouse/table-constraints" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a></li></ul>
+<p>#MicrosoftFabric #FabricWarehouse #TSQL #OneLake #DataWarehouse #DataEngineering #Lakehouse #DeltaLake</p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

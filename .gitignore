@@ -1,0 +1,9 @@
+# Publish only the site. Everything else in this folder is private working material.
+/*
+!/.gitignore
+!/index.html
+!/css/
+!/blogs/
+!/assets/
+blogs/build_articles.py
+blogs/__pycache__/

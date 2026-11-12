@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Building a Solid Foundation — Best Practices for Power BI Data Modeling | Logeshkumar Sivakumar</title>
+<meta name="description" content="Data modeling is the strategic foundation every Power BI report is built on. Eight practices that separate models you can ship from models you'll regret." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EFEAFB;
+    --bg-tint: #E6DFF7;
+    --paper: #ffffff;
+    --ink: #2E2A3B;
+    --ink-2: #4A4458;
+    --ink-3: #5F5870;
+    --rule: #D9D2EA;
+    --rule-strong: #BFB5D9;
+    --accent: #7446B4;
+    --accent-soft: #E4DAF6;
+    --accent-ink: #55308A;
+    --warm: #C2573A;
+    --warm-soft: #FDEBE1;
+    --danger: oklch(0.55 0.16 25);
+    --danger-soft: oklch(0.94 0.04 25);
+    --good: oklch(0.55 0.12 155);
+    --good-soft: oklch(0.94 0.05 155);
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in oklch, var(--accent), transparent 70%); transition: border-color .15s; }
+  a:hover { border-color: var(--accent); }
+
+  /* topbar */
+  .topbar { position: sticky; top: 0; z-index: 20; background: color-mix(in oklch, var(--bg), transparent 8%); backdrop-filter: saturate(140%) blur(10px); -webkit-backdrop-filter: saturate(140%) blur(10px); border-bottom: 1px solid var(--rule); }
+  .topbar-inner { max-width: 1240px; margin: 0 auto; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); border-bottom: none; }
+  .brand:hover { border-bottom: none; }
+  .brand-mark { width: 22px; height: 22px; border-radius: 6px; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-family: var(--serif); font-weight: 700; font-size: 13px; font-style: italic; }
+  .topnav { display: flex; gap: 22px; font-size: 13px; color: var(--ink-2); }
+  .topnav a { color: inherit; border-bottom: none; }
+  .topnav a:hover { color: var(--ink); border-bottom: none; }
+  .topic-chip { display: inline-flex; align-items: center; gap: 8px; padding: 5px 11px; background: var(--paper); border: 1px solid var(--rule); border-radius: 999px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-2); }
+  .topic-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--warm); }
+
+  /* progress */
+  .progress { position: fixed; top: 0; left: 0; height: 2px; background: var(--accent); width: 0%; z-index: 30; transition: width .08s linear; }
+
+  /* layout */
+  .article-wrap { max-width: 1240px; margin: 0 auto; padding: 64px 32px 120px; display: grid; grid-template-columns: 220px minmax(0, 1fr) 220px; gap: 56px; }
+  @media (max-width: 1100px) { .article-wrap { grid-template-columns: 1fr; gap: 32px; padding: 48px 24px 80px; } .sidecol { display: none; } }
+  .sidecol { position: sticky; top: 96px; align-self: start; height: max-content; }
+  .toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+  .toc { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .toc a { display: block; font-size: 13px; color: var(--ink-3); border-bottom: none; line-height: 1.45; padding-left: 10px; border-left: 2px solid var(--rule); transition: color .15s, border-color .15s; }
+  .toc a:hover, .toc a.active { color: var(--ink); border-left-color: var(--accent); }
+  .meta-side { margin-top: 40px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); line-height: 1.8; }
+  .meta-side .row { display: flex; justify-content: space-between; gap: 8px; }
+  .meta-side .row + .row { border-top: 1px dashed var(--rule); margin-top: 8px; padding-top: 8px; }
+
+  article { min-width: 0; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+  .eyebrow .num { background: var(--accent); color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; }
+
+  h1.title { font-family: var(--serif); font-weight: 600; font-size: clamp(34px, 4.6vw, 56px); line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 24px; color: var(--ink); text-wrap: balance; }
+  h1.title em { font-style: italic; color: var(--ink-2); font-weight: 500; }
+  .deck { font-family: var(--serif); font-size: clamp(18px, 1.8vw, 22px); line-height: 1.5; color: var(--ink-2); margin: 0 0 36px; max-width: 60ch; text-wrap: pretty; }
+
+  .byline { display: flex; align-items: center; gap: 16px; padding: 18px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin-bottom: 48px; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, oklch(0.55 0.16 258), oklch(0.65 0.13 38)); color: white; display: grid; place-items: center; font-family: var(--serif); font-weight: 600; font-size: 18px; }
+  .byline-meta { font-size: 14px; line-height: 1.4; }
+  .byline-meta .name { color: var(--ink); font-weight: 600; }
+  .byline-meta .sub { color: var(--ink-3); font-family: var(--mono); font-size: 11.5px; }
+  .byline-spacer { flex: 1; }
+  .read-stats { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); text-align: right; line-height: 1.5; }
+
+  article h2 { font-family: var(--serif); font-weight: 600; font-size: clamp(26px, 2.8vw, 34px); line-height: 1.18; letter-spacing: -0.015em; margin: 64px 0 20px; color: var(--ink); scroll-margin-top: 90px; }
+  article h2 .hash { color: var(--accent); font-family: var(--mono); font-weight: 400; font-size: 0.6em; vertical-align: 0.18em; margin-right: 10px; opacity: .8; }
+  article h3 { font-family: var(--serif); font-weight: 600; font-size: 21px; line-height: 1.3; color: var(--ink); margin: 32px 0 10px; }
+  article h3 .h3-num { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); margin-right: 10px; vertical-align: 0.08em; }
+  article p { font-size: 17.5px; line-height: 1.72; margin: 0 0 20px; color: var(--ink); text-wrap: pretty; }
+  article p strong { color: var(--ink); font-weight: 600; }
+  article p em { font-style: italic; color: var(--ink-2); }
+  article ul, article ol { padding-left: 24px; margin: 0 0 20px; }
+  article li { margin-bottom: 8px; }
+
+  .lead p { font-family: var(--serif); font-size: 21px; line-height: 1.55; color: var(--ink); }
+  .lead p:first-of-type::first-letter { font-family: var(--serif); font-weight: 600; font-size: 4.2em; float: left; line-height: 0.85; margin: 6px 10px 0 -4px; color: var(--accent-ink); }
+
+  .pullquote { font-family: var(--serif); font-style: italic; font-size: 24px; line-height: 1.4; color: var(--ink-2); border-left: 3px solid var(--accent); padding: 4px 0 4px 24px; margin: 36px 0; }
+
+  /* figures */
+  .figure { margin: 44px 0; }
+  .figure-frame { background: var(--paper); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+  .figure-tag { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 18px; border-bottom: 1px solid var(--rule); font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); background: var(--bg-tint); }
+  .figure-tag .num { color: var(--ink-2); font-weight: 600; }
+  .figure-body { padding: 28px 24px; }
+  figcaption { font-family: var(--serif); font-style: italic; font-size: 14.5px; line-height: 1.55; color: var(--ink-3); margin-top: 14px; text-align: center; text-wrap: balance; }
+
+  /* Fig 1 — pipeline steps */
+  .pipeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+  .pipeline::before { content: ""; position: absolute; top: 36px; left: 12%; right: 12%; height: 2px; background: repeating-linear-gradient(90deg, var(--rule-strong) 0 6px, transparent 6px 12px); z-index: 0; }
+  .pipe-step { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 4px 8px; position: relative; z-index: 1; }
+  .pipe-num { width: 48px; height: 48px; border-radius: 12px; background: var(--paper); border: 1.5px solid var(--rule-strong); display: grid; place-items: center; font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink); }
+  .pipe-step:nth-child(1) .pipe-num { background: oklch(0.96 0.04 258); border-color: var(--accent); color: var(--accent-ink); }
+  .pipe-step:nth-child(2) .pipe-num { background: oklch(0.96 0.05 38); border-color: var(--warm); color: oklch(0.4 0.13 38); }
+  .pipe-step:nth-child(3) .pipe-num { background: oklch(0.96 0.05 155); border-color: var(--good); color: oklch(0.32 0.12 155); }
+  .pipe-step:nth-child(4) .pipe-num { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .pipe-label { font-family: var(--serif); font-size: 16px; font-weight: 600; color: var(--ink); text-align: center; }
+  .pipe-sub { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); text-align: center; }
+  .pipe-desc { font-size: 13px; line-height: 1.5; color: var(--ink-2); text-align: center; max-width: 180px; }
+  @media (max-width: 720px) { .pipeline { grid-template-columns: 1fr 1fr; gap: 24px 12px; } .pipeline::before { display: none; } }
+
+  /* Fig 2 — impact quadrants */
+  .impact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+  .impact-cell { background: var(--paper); padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
+  .impact-head { display: flex; justify-content: space-between; align-items: center; }
+  .impact-name { font-family: var(--serif); font-weight: 600; font-size: 18px; color: var(--ink); }
+  .impact-tag { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+  .impact-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
+  .impact-bar { display: flex; flex-direction: column; gap: 6px; }
+  .impact-bar-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+  .impact-bar-fill { height: 8px; border-radius: 3px; background: var(--rule); position: relative; overflow: hidden; }
+  .impact-bar-fill::after { content: ""; position: absolute; inset: 0; width: var(--w, 30%); border-radius: 3px; }
+  .impact-bar.bad .impact-bar-fill::after { background: var(--danger); }
+  .impact-bar.good .impact-bar-fill::after { background: var(--good); }
+  .impact-bar-val { font-family: var(--mono); font-size: 11px; color: var(--ink); font-weight: 600; }
+  .impact-bar.bad .impact-bar-val { color: var(--danger); }
+  .impact-bar.good .impact-bar-val { color: var(--good); }
+  .impact-line { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+  @media (max-width: 600px) { .impact-grid { grid-template-columns: 1fr; } }
+
+  /* Fig 3 — schema toggle */
+  .schema-controls { display: inline-flex; align-items: center; background: var(--bg-tint); border: 1px solid var(--rule); border-radius: 999px; padding: 4px; margin: 0 0 22px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .schema-controls button { background: transparent; border: none; padding: 8px 16px; border-radius: 999px; color: var(--ink-3); cursor: pointer; font: inherit; transition: all .2s; }
+  .schema-controls button.active { background: var(--ink); color: var(--bg); }
+  .schema-stage { position: relative; background: var(--bg-tint); border: 1px solid var(--rule); border-radius: 12px; padding: 20px; min-height: 380px; }
+  .schema-stage svg { width: 100%; height: 380px; display: block; }
+  .schema-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 18px; background: var(--rule); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .schema-meta-cell { background: var(--paper); padding: 12px 14px; }
+  .schema-meta-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+  .schema-meta-val { font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink); line-height: 1.25; }
+  .schema-meta-val.bad { color: var(--danger); }
+  .schema-meta-val.ok { color: var(--warm); }
+  .schema-meta-val.good { color: var(--good); }
+  @media (max-width: 600px) { .schema-meta { grid-template-columns: 1fr; } }
+
+  /* Fig 4 — measures vs columns */
+  .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+  .vs-cell { background: var(--paper); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .vs-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .vs-name { font-family: var(--serif); font-weight: 600; font-size: 20px; color: var(--ink); }
+  .vs-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 7px; border-radius: 3px; }
+  .vs-tag.heavy { background: var(--danger-soft); color: var(--danger); }
+  .vs-tag.light { background: var(--good-soft); color: var(--good); }
+  .vs-row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--rule); font-size: 14px; }
+  .vs-row:first-of-type { border-top: none; padding-top: 0; }
+  .vs-row .vs-k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); padding-top: 2px; }
+  .vs-row .vs-v { color: var(--ink); line-height: 1.5; }
+  .vs-when { background: var(--bg-tint); padding: 12px 14px; border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.5; border-left: 3px solid var(--accent); margin-top: auto; }
+  .vs-when strong { color: var(--ink); }
+  @media (max-width: 720px) { .vs-grid { grid-template-columns: 1fr; } }
+
+  /* Fig 5 — checklist */
+  .checklist-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+  .check-cell { background: var(--paper); padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; }
+  .check-num { flex: 0 0 32px; width: 32px; height: 32px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-ink); font-family: var(--mono); font-size: 12px; font-weight: 600; display: grid; place-items: center; }
+  .check-body .check-title { font-family: var(--serif); font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.25; margin-bottom: 4px; }
+  .check-body .check-rule { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); line-height: 1.5; }
+  @media (max-width: 720px) { .checklist-grid { grid-template-columns: 1fr; } }
+
+  /* end */
+  .end-rule { border: 0; border-top: 1px solid var(--rule); margin: 56px 0; }
+  .end-cta { background: var(--ink); color: var(--bg); border-radius: 14px; padding: 36px; display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; }
+  .end-cta h3 { font-family: var(--serif); font-size: 22px; font-weight: 500; margin: 0 0 8px; color: var(--bg); line-height: 1.3; }
+  .end-cta p { margin: 0; color: oklch(0.78 0.02 250); font-size: 15px; }
+  .cta-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--bg); color: var(--ink); padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border-bottom: none; white-space: nowrap; }
+  .cta-btn:hover { background: white; border-bottom: none; }
+  .cta-btn .arr { transition: transform .2s; }
+  .cta-btn:hover .arr { transform: translateX(3px); }
+  @media (max-width: 720px) { .end-cta { grid-template-columns: 1fr; padding: 28px; } }
+
+  .references { margin-top: 40px; font-size: 14px; }
+  .references h4 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 14px; font-weight: 500; }
+  .references ol { margin: 0; padding-left: 18px; color: var(--ink-2); }
+  .references li { margin-bottom: 6px; }
+  .tags { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag { font-family: var(--mono); font-size: 11px; color: var(--ink-3); background: var(--bg-tint); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--rule); }
+  .copy-foot { margin-top: 60px; padding-top: 28px; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 11px; color: var(--ink-3); text-align: center; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="../index.html" class="brand">
+      <div class="brand-mark">L</div>
+      <span>Field Notes&nbsp;·&nbsp;Logeshkumar Sivakumar</span>
+    </a>
+    <nav class="topnav">
+      <a href="#what">What</a>
+      <a href="#impact">Impact</a>
+      <a href="#practices">Practices</a>
+      <a href="#conclusion">Conclusion</a>
+    </nav>
+    <div class="topic-chip"><span class="dot"></span>Power BI&nbsp;·&nbsp;Foundations</div>
+  </div>
+</header>
+
+<div class="article-wrap">
+
+  <aside class="sidecol">
+    <div class="toc-label">In this post</div>
+    <ul class="toc" id="toc">
+      <li><a href="#what">What is data modeling?</a></li>
+      <li><a href="#impact">How it impacts reports</a></li>
+      <li><a href="#practices">8 best practices</a></li>
+      <li><a href="#conclusion">Conclusion</a></li>
+    </ul>
+    <div class="meta-side">
+      <div class="row"><span>Topic</span><span>Power BI</span></div>
+      <div class="row"><span>Read</span><span>7 min</span></div>
+      <div class="row"><span>Posted</span><span>Apr 5, 2025</span></div>
+      <div class="row"><span>Level</span><span>Practitioner</span></div>
+    </div>
+  </aside>
+
+  <article>
+    <div class="eyebrow">
+      <span class="num">F·02</span>
+      Field Notes — Power BI Foundations
+    </div>
+
+    <h1 class="title">Building a Solid Foundation: <em>Best Practices for</em> Power BI Data Modeling</h1>
+
+    <p class="deck">Beneath every slick dashboard sits a data model. Get it right and reports are fast, accurate, and easy to maintain. Get it wrong and you spend the next year explaining why two visuals disagree.</p>
+
+    <div class="byline">
+      <div class="avatar">L</div>
+      <div class="byline-meta">
+        <div class="name">Logeshkumar Sivakumar</div>
+        <div class="sub">BI &amp; Fabric Analytics Engineer · DP-600 &amp; DP-700 Certified</div>
+      </div>
+      <div class="byline-spacer"></div>
+      <div class="read-stats">7 min read<br/>Apr 5, 2025</div>
+    </div>
+
+    <div class="lead">
+      <p>Power BI is an incredibly powerful tool for turning raw data into stunning visuals and actionable insights. But beneath the surface of those slick dashboards and informative reports lies a critical component: the data model. Accurate and efficient modeling is the key to generating fast, precise, and easily maintainable reports.</p>
+      <p>Poor modeling, on the other hand, leads to slow performance, inaccurate results, and unnecessary complexity. This post walks through what data modeling actually <em>is</em> in Power BI, why it matters, and eight practices that separate models you can ship from models you'll regret.</p>
+    </div>
+
+    <!-- §1 -->
+    <h2 id="what"><span class="hash">§1</span>What Exactly is Data Modeling in Power BI?</h2>
+
+    <p>At its core, data modeling is the process of connecting multiple data sources, structuring the data, and defining the relationships between different data tables. Think of it as the blueprint for your data analysis. In Power BI specifically, this involves four moves:</p>
+
+    <ul>
+      <li><strong>Importing data</strong> from Excel files, databases, cloud services, and beyond into Power BI Desktop.</li>
+      <li><strong>Transforming data</strong> using Power Query — removing unnecessary columns and rows, changing data types, merging tables.</li>
+      <li><strong>Defining relationships</strong> between tables (linking a Sales table to a Product table via a Product ID).</li>
+      <li><strong>Adding calculations</strong> using DAX to derive measures and calculated columns from the base data.</li>
+    </ul>
+
+    <p>The goal is to create a structure optimized for querying, reporting, and analysis inside the Power BI engine.</p>
+
+    <!-- FIG 01 -->
+    <figure class="figure">
+      <div class="figure-frame">
+        <div class="figure-tag">
+          <span class="num">Fig. 01 — The four moves</span>
+          <span class="label">From raw source to model</span>
+        </div>
+        <div class="figure-body">
+          <div class="pipeline">
+            <div class="pipe-step">
+              <div class="pipe-num">01</div>
+              <div class="pipe-sub">step one</div>
+              <div class="pipe-label">Import</div>
+              <div class="pipe-desc">Connect to Excel, SQL, APIs, and cloud sources.</div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-num">02</div>
+              <div class="pipe-sub">step two</div>
+              <div class="pipe-label">Transform</div>
+              <div class="pipe-desc">Shape and clean in Power Query before it lands.</div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-num">03</div>
+              <div class="pipe-sub">step three</div>
+              <div class="pipe-label">Relate</div>
+              <div class="pipe-desc">Define how tables connect via keys.</div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-num">04</div>
+              <div class="pipe-sub">step four</div>
+              <div class="pipe-label">Calculate</div>
+              <div class="pipe-desc">Add measures and columns with DAX.</div>
+            </div>
+          </div>
+          <figcaption>Every Power BI model passes through these four moves. The discipline you apply at each step compounds downstream.</figcaption>
+        </div>
+      </div>
+    </figure>
+
+    <!-- §2 -->
+    <h2 id="impact"><span class="hash">§2</span>How Data Modeling Impacts Your Reports</h2>
+
+    <p>The quality of your data model directly impacts four things readers feel — even if they never open the model view:</p>
+
+    <ul>
+      <li><strong>Performance.</strong> A well-designed model lets the VertiPaq engine compress data and process queries quickly. Poor modeling shows up as slow loads and sluggish slicers.</li>
+      <li><strong>Accuracy.</strong> Correct relationships and calculations produce reliable metrics. Incorrect relationships produce wildly misleading results that look perfectly normal.</li>
+      <li><strong>Usability.</strong> A clean model is easier for both report builders and Q&amp;A users to navigate. A messy one breeds tangled DAX.</li>
+      <li><strong>Scalability.</strong> When data grows or requirements change, a well-structured model is dramatically cheaper to update than a tangled one.</li>
+    </ul>
+
+    <!-- FIG 02 -->
+    <figure class="figure">
+      <div class="figure-frame">
+        <div class="figure-tag">
+          <span class="num">Fig. 02 — Four dimensions of impact</span>
+          <span class="label">Poor model vs. good model</span>
+        </div>
+        <div class="figure-body">
+          <div class="impact-grid">
+            <div class="impact-cell">
+              <div class="impact-head">
+                <div class="impact-name">Performance</div>
+                <div class="impact-tag">query time</div>
+              </div>
+              <div class="impact-bars">
+                <div class="impact-bar bad">
+                  <div class="impact-bar-label">poor model</div>
+                  <div class="impact-bar-fill" style="--w: 92%;"></div>
+                  <div class="impact-bar-val">slow</div>
+                </div>
+                <div class="impact-bar good">
+                  <div class="impact-bar-label">good model</div>
+                  <div class="impact-bar-fill" style="--w: 26%;"></div>
+                  <div class="impact-bar-val">fast</div>
+                </div>
+              </div>
+              <div class="impact-line">VertiPaq compresses better when columns are narrow, types are right, and relationships are clean.</div>
+            </div>
+
+            <div class="impact-cell">
+              <div class="impact-head">
+                <div class="impact-name">Accuracy</div>
+                <div class="impact-tag">trust</div>
+              </div>
+              <div class="impact-bars">
+                <div class="impact-bar bad">
+                  <div class="impact-bar-label">poor model</div>
+                  <div class="impact-bar-fill" style="--w: 88%;"></div>
+                  <div class="impact-bar-val">drifts</div>
+                </div>
+                <div class="impact-bar good">
+                  <div class="impact-bar-label">good model</div>
+                  <div class="impact-bar-fill" style="--w: 18%;"></div>
+                  <div class="impact-bar-val">solid</div>
+                </div>
+              </div>
+              <div class="impact-line">Bad relationships fan out silently. The number looks right until someone double-checks.</div>
+            </div>
+
+            <div class="impact-cell">
+              <div class="impact-head">
+                <div class="impact-name">Usability</div>
+                <div class="impact-tag">authoring</div>
+              </div>
+              <div class="impact-bars">
+                <div class="impact-bar bad">
+                  <div class="impact-bar-label">poor model</div>
+                  <div class="impact-bar-fill" style="--w: 80%;"></div>
+                  <div class="impact-bar-val">tangled</div>
+                </div>
+                <div class="impact-bar good">
+                  <div class="impact-bar-label">good model</div>
+                  <div class="impact-bar-fill" style="--w: 22%;"></div>
+                  <div class="impact-bar-val">clean</div>
+                </div>
+              </div>
+              <div class="impact-line">Cleaner Fields pane → fewer mistakes from report builders and Q&amp;A users.</div>
+            </div>
+
+            <div class="impact-cell">
+              <div class="impact-head">
+                <div class="impact-name">Scalability</div>
+                <div class="impact-tag">cost of change</div>
+              </div>
+              <div class="impact-bars">
+                <div class="impact-bar bad">
+                  <div class="impact-bar-label">poor model</div>
+                  <div class="impact-bar-fill" style="--w: 84%;"></div>
+                  <div class="impact-bar-val">painful</div>
+                </div>
+                <div class="impact-bar good">
+                  <div class="impact-bar-label">good model</div>
+                  <div class="impact-bar-fill" style="--w: 28%;"></div>
+                  <div class="impact-bar-val">cheap</div>
+                </div>
+              </div>
+              <div class="impact-line">Star schemas absorb new metrics without re-wiring the whole report.</div>
+            </div>
+          </div>
+          <figcaption>The four areas where modeling discipline pays back compound interest.</figcaption>
+        </div>
+      </div>
+    </figure>
+
+    <!-- §3 -->
+    <h2 id="practices"><span class="hash">§3</span>Best Practices for Power BI Data Modeling</h2>
+
+    <p>To build efficient, accurate, and maintainable Power BI reports, follow these eight practices. The first is the load-bearing one — get it right and most of the others fall into place.</p>
+
+    <h3><span class="h3-num">01</span>Embrace the star schema</h3>
+
+    <p>A star schema is the cornerstone of efficient Power BI modeling. It has three parts:</p>
+    <ul>
+      <li><strong>Fact tables</strong> contain transactional data and measurements (Sales Amount, Order Quantity). They are numeric and carry foreign keys to dimensions.</li>
+      <li><strong>Dimension tables</strong> contain descriptive context (Product, Customer, Date). Each has a unique primary key.</li>
+      <li><strong>Relationships</strong> flow from dimension to fact, one-to-many.</li>
+    </ul>
+    <p>Avoid <em>snowflake schemas</em> — where dimensions link to other dimensions — when you can flatten attributes into a single dimension instead. Star schemas optimise the engine, simplify DAX, and read intuitively.</p>
+
+    <!-- FIG 03 -->
+    <figure class="figure">
+      <div class="figure-frame">
+        <div class="figure-tag">
+          <span class="num">Fig. 03 — Schema comparison</span>
+          <span class="label">Toggle to see the difference</span>
+        </div>
+        <div class="figure-body">
+          <div class="schema-controls" role="tablist" aria-label="Schema comparison">
+            <button id="sc-flat" role="tab">Flat table</button>
+            <button id="sc-snow" role="tab">Snowflake</button>
+            <button id="sc-star" class="active" role="tab" aria-selected="true">Star schema</button>
+          </div>
+
+          <div class="schema-stage">
+            <svg id="schema-svg" viewBox="0 0 760 380" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <defs>
+                <marker id="rel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"/>
+                </marker>
+              </defs>
+              <g id="schema-content"></g>
+            </svg>
+          </div>
+
+          <div class="schema-meta">
+            <div class="schema-meta-cell">
+              <div class="schema-meta-label">Query performance</div>
+              <div class="schema-meta-val" id="m-perf">Fast</div>
+            </div>
+            <div class="schema-meta-cell">
+              <div class="schema-meta-label">DAX complexity</div>
+              <div class="schema-meta-val" id="m-dax">Simple</div>
+            </div>
+            <div class="schema-meta-cell">
+              <div class="schema-meta-label">Maintenance</div>
+              <div class="schema-meta-val" id="m-maint">Easy</div>
+            </div>
+          </div>
+          <figcaption>Same underlying data; three ways to model it. The shape determines almost everything that comes after.</figcaption>
+        </div>
+      </div>
+    </figure>
+
+    <h3><span class="h3-num">02</span>Optimize your data at the source</h3>
+    <ul>
+      <li><strong>Remove unnecessary columns.</strong> Only import what you actually use. Fewer columns = less memory, faster processing.</li>
+      <li><strong>Remove unnecessary rows.</strong> Filter early — in Power Query or, better, at the source. If you only need 3 years of sales, don't load 20.</li>
+      <li><strong>Use appropriate data types.</strong> Whole Number, Decimal, Date, Text — match the data. Text columns holding numbers ruin compression and break sorts.</li>
+    </ul>
+
+    <h3><span class="h3-num">03</span>Manage relationships carefully</h3>
+    <ul>
+      <li><strong>Prefer single-direction relationships.</strong> Most should be one-to-many (dimension → fact), single filter direction.</li>
+      <li><strong>Use bi-directional sparingly.</strong> They introduce ambiguity and performance cost. Understand the implication before reaching for one.</li>
+      <li><strong>Use integer keys.</strong> Integer-based relationships outperform text-based ones, especially at scale.</li>
+    </ul>
+
+    <h3><span class="h3-num">04</span>Create a dedicated date table</h3>
+    <ul>
+      <li><strong>Disable auto date/time</strong> in Power BI settings. It silently creates a hidden date table per date field and bloats the model.</li>
+      <li><strong>Build a calendar dimension</strong> with Year, Quarter, Month, Day, Day-of-Week, and any fiscal periods you need. Mark it as a date table. This is the only way to get robust time-intelligence in DAX.</li>
+    </ul>
+
+    <h3><span class="h3-num">05</span>Optimize cardinality</h3>
+    <p>Aim for lower cardinality — fewer unique values — in columns where possible, especially relationship keys. High-cardinality columns consume disproportionate memory because they compress poorly. Splitting a datetime into separate Date and Time columns is a classic win.</p>
+
+    <h3><span class="h3-num">06</span>Prefer measures over calculated columns</h3>
+    <p>Calculated columns are computed row-by-row at refresh time and stored in the model — they consume memory. Measures are computed on-the-fly at query time based on the current filter context — they consume almost none. The rule of thumb:</p>
+
+    <!-- FIG 04 -->
+    <figure class="figure">
+      <div class="figure-frame">
+        <div class="figure-tag">
+          <span class="num">Fig. 04 — Pick the right tool</span>
+          <span class="label">Measures vs. calculated columns</span>
+        </div>
+        <div class="figure-body">
+          <div class="vs-grid">
+            <div class="vs-cell">
+              <div class="vs-head">
+                <div class="vs-name">Calculated column</div>
+                <div class="vs-tag heavy">memory · heavy</div>
+              </div>
+              <div class="vs-row"><div class="vs-k">computed</div><div class="vs-v">Row-by-row at refresh time</div></div>
+              <div class="vs-row"><div class="vs-k">storage</div><div class="vs-v">Materialised into the model</div></div>
+              <div class="vs-row"><div class="vs-k">filter ctx</div><div class="vs-v">None — fixed at refresh</div></div>
+              <div class="vs-row"><div class="vs-k">cost</div><div class="vs-v">Adds to file size and RAM</div></div>
+              <div class="vs-when"><strong>Use when</strong> the result must be sliceable, used in a relationship, or referenced as a category in visuals.</div>
+            </div>
+            <div class="vs-cell">
+              <div class="vs-head">
+                <div class="vs-name">Measure</div>
+                <div class="vs-tag light">memory · light</div>
+              </div>
+              <div class="vs-row"><div class="vs-k">computed</div><div class="vs-v">At query time</div></div>
+              <div class="vs-row"><div class="vs-k">storage</div><div class="vs-v">Definition only — no row storage</div></div>
+              <div class="vs-row"><div class="vs-k">filter ctx</div><div class="vs-v">Respects every slicer and visual</div></div>
+              <div class="vs-row"><div class="vs-k">cost</div><div class="vs-v">Negligible memory; CPU on use</div></div>
+              <div class="vs-when"><strong>Use when</strong> the result is an aggregate displayed in a visual — totals, averages, ratios, KPIs.</div>
+            </div>
+          </div>
+          <figcaption>When in doubt: write a measure first. Promote to a calculated column only when you genuinely need to slice by the result.</figcaption>
+        </div>
+      </div>
+    </figure>
+
+    <h3><span class="h3-num">07</span>Hide unnecessary fields</h3>
+    <p>Hide foreign-key columns in fact tables and any technical or helper columns from the Report view. This creates a cleaner Fields pane that gently steers report builders toward the right measures and away from the raw scaffolding.</p>
+
+    <h3><span class="h3-num">08</span>Use meaningful names</h3>
+    <p>Give tables, columns, and measures clear, business-friendly names. <em>"Total Net Revenue"</em> beats <em>"sum_amt_v2_fix"</em> in every conversation it ever appears in. The model is a contract between you and the people who'll author against it for the next three years.</p>
+
+    <!-- FIG 05 -->
+    <figure class="figure">
+      <div class="figure-frame">
+        <div class="figure-tag">
+          <span class="num">Fig. 05 — The eight-point checklist</span>
+          <span class="label">Pin this somewhere</span>
+        </div>
+        <div class="figure-body">
+          <div class="checklist-grid">
+            <div class="check-cell">
+              <div class="check-num">01</div>
+              <div class="check-body">
+                <div class="check-title">Star schema by default</div>
+                <div class="check-rule">facts → dims · single direction · one-to-many</div>
+              </div>
+            </div>
+            <div class="check-cell">
+              <div class="check-num">02</div>
+              <div class="check-body">
+                <div class="check-title">Trim at the source</div>
+                <div class="check-rule">drop unused columns &amp; rows · set types</div>
+              </div>
+            </div>
+            <div class="check-cell">
+              <div class="check-num">03</div>
+              <div class="check-body">
+                <div class="check-title">Mind the relationships</div>
+                <div class="check-rule">single direction · integer keys · no ambiguity</div>
+              </div>
+            </div>
+            <div class="check-cell">
+              <div class="check-num">04</div>
+              <div class="check-body">
+                <div class="check-title">Real date table</div>
+                <div class="check-rule">disable auto date/time · mark as date table</div>
+              </div>
+            </div>
+            <div class="check-cell">
+              <div class="check-num">05</div>
+              <div class="check-body">
+                <div class="check-title">Low cardinality keys</div>
+                <div class="check-rule">narrow keys · split datetime · drop precision</div>
+              </div>
+            </div>
+            <div class="check-cell">
+              <div class="check-num">06</div>
+              <div class="check-body">
+                <div class="check-title">Measures first</div>
+                <div class="check-rule">columns only when sliced or related-to</div>
+              </div>
+            </div>
+            <div class="check-cell">
+              <div class="check-num">07</div>
+              <div class="check-body">
+                <div class="check-title">Hide the plumbing</div>
+                <div class="check-rule">foreign keys &amp; helpers off the report view</div>
+              </div>
+            </div>
+            <div class="check-cell">
+              <div class="check-num">08</div>
+              <div class="check-body">
+                <div class="check-title">Speak business</div>
+                <div class="check-rule">friendly names for tables · columns · measures</div>
+              </div>
+            </div>
+          </div>
+          <figcaption>None of these are heroic moves. They are small decisions, made consistently, that decide whether your report is loved or quietly worked around.</figcaption>
+        </div>
+      </div>
+    </figure>
+
+    <!-- §4 -->
+    <h2 id="conclusion"><span class="hash">§4</span>Conclusion</h2>
+
+    <p>Data modeling isn't just a technical prerequisite — it's the strategic foundation effective Power BI reports are built on. Time spent understanding your data and applying these practices, particularly the star schema, Power Query discipline, careful relationships, and a real date table, is time you'll get back several times over.</p>
+
+    <p class="pullquote">A well-designed data model leads to faster reports, trustworthy insights, simpler DAX, and easier maintenance — ultimately unlocking the true potential of Power BI for your organisation.</p>
+
+    <p>To go deeper on modeling, the <a href="https://github.com/Bhanu-Thakur/Contoso-Data-Generator-v3" target="_blank" rel="noopener">Contoso Dataset by Bhanu Thakur</a> is worth your time. It's the canonical sandbox for sharpening these instincts.</p>
+
+    <p>Which data-modeling technique has been a game-changer for you? I'd genuinely like to hear what worked.</p>
+
+    <hr class="end-rule"/>
+
+    <div class="end-cta">
+      <div>
+        <h3>Sitting on a Power BI model that's grown a few too many tables?</h3>
+        <p>Happy to compare notes — sometimes a 30-minute look is enough to find the one relationship that's slowing everything down.</p>
+      </div>
+      <a href="../index.html#contact" class="cta-btn">Get in touch <span class="arr">→</span></a>
+    </div>
+
+    <div class="references">
+      <h4>Further reading</h4>
+      <ol>
+        <li><a href="https://learn.microsoft.com/en-us/power-bi/guidance/star-schema" target="_blank" rel="noopener">Understand star schema and the importance for Power BI — learn.microsoft.com</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-auto-date-time" target="_blank" rel="noopener">Auto date/time guidance in Power BI Desktop — learn.microsoft.com</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-relationships-understand" target="_blank" rel="noopener">Model relationships in Power BI Desktop — learn.microsoft.com</a></li>
+      </ol>
+    </div>
+
+    <div class="tags">
+      <span class="tag">#PowerBI</span>
+      <span class="tag">#DataModeling</span>
+      <span class="tag">#StarSchema</span>
+      <span class="tag">#DAX</span>
+      <span class="tag">#PowerQuery</span>
+      <span class="tag">#BusinessIntelligence</span>
+      <span class="tag">#VertiPaq</span>
+      <span class="tag">#Analytics</span>
+      <span class="tag">#FieldNotes</span>
+    </div>
+
+    <div class="copy-foot">
+      © 2025 Logeshkumar Sivakumar &nbsp;·&nbsp; All rights reserved<br/>
+      <em>Field Notes — Power BI Foundations</em>
+    </div>
+  </article>
+
+  <aside class="sidecol" aria-hidden="true"></aside>
+
+</div>
+
+<script>
+  // reading progress bar
+  const progress = document.getElementById('progress');
+  function updateProgress() {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    progress.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  // TOC scrollspy
+  const tocLinks = [...document.querySelectorAll('#toc a')];
+  const sections = tocLinks.map(a => document.querySelector(a.getAttribute('href')));
+  function updateTOC() {
+    const y = window.scrollY + 140;
+    let activeIdx = 0;
+    sections.forEach((s, i) => { if (s && s.offsetTop <= y) activeIdx = i; });
+    tocLinks.forEach((a, i) => a.classList.toggle('active', i === activeIdx));
+  }
+  window.addEventListener('scroll', updateTOC, { passive: true });
+  updateTOC();
+
+  // smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+    });
+  });
+
+  // ── schema toggle ──
+  const schemaContent = document.getElementById('schema-content');
+  const mPerf = document.getElementById('m-perf');
+  const mDax = document.getElementById('m-dax');
+  const mMaint = document.getElementById('m-maint');
+
+  function box(x, y, w, h, label, sub, opts = {}) {
+    const fill = opts.fill || '#fff';
+    const stroke = opts.stroke || 'var(--rule-strong)';
+    const isFact = opts.fact;
+    return `
+      <g transform="translate(${x},${y})">
+        <rect x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${isFact ? 2 : 1.2}"/>
+        <text text-anchor="middle" y="-2" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="${isFact ? 700 : 600}" fill="var(--ink)">${label}</text>
+        <text text-anchor="middle" y="14" font-family="IBM Plex Mono, monospace" font-size="9.5" letter-spacing="0.5" fill="var(--ink-3)">${sub}</text>
+      </g>
+    `;
+  }
+  function line(x1, y1, x2, y2, opts = {}) {
+    const stroke = opts.stroke || 'var(--ink-3)';
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="1.4" marker-end="url(#rel)" opacity="0.7"/>`;
+  }
+
+  const factColor    = { fill: 'var(--accent-soft)', stroke: 'var(--accent)', fact: true };
+  const dimColor     = { fill: '#fff', stroke: 'var(--rule-strong)' };
+  const subdimColor  = { fill: 'var(--bg-tint)', stroke: 'var(--rule)' };
+
+  const layouts = {
+    flat: () => {
+      return `<g transform="translate(380,190)">
+        <rect x="-280" y="-130" width="560" height="260" rx="10" fill="var(--danger-soft)" stroke="var(--danger)" stroke-width="2"/>
+        <text text-anchor="middle" y="-95" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="700" fill="var(--ink)">FactEverything</text>
+        <text text-anchor="middle" y="-78" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="0.5" fill="var(--danger)">one giant table · 42 columns</text>
+        <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--ink-2)">
+          <text x="-260" y="-50">order_id, order_date, customer_id, customer_name,</text>
+          <text x="-260" y="-32">customer_city, customer_country, product_id, product_name,</text>
+          <text x="-260" y="-14">product_category, product_subcategory, brand, supplier_name,</text>
+          <text x="-260" y="4">supplier_country, sales_rep, region, store_id, store_name,</text>
+          <text x="-260" y="22">store_address, quantity, unit_price, discount, tax, total,</text>
+          <text x="-260" y="40">cost, margin, shipped_date, delivery_date, currency_code,</text>
+          <text x="-260" y="58">exchange_rate, fiscal_year, fiscal_quarter, fiscal_month, ...</text>
+        </g>
+        <text text-anchor="middle" y="100" font-family="Source Serif 4, serif" font-style="italic" font-size="13" fill="var(--danger)">duplication everywhere · poor compression · brittle DAX</text>
+      </g>`;
+    },
+    snow: () => {
+      let svg = '';
+      svg += box(380, 200, 130, 50, 'FactSales', 'measurements', factColor);
+      svg += box(170, 100, 110, 44, 'DimProduct', 'dimension', dimColor);
+      svg += box(590, 100, 110, 44, 'DimCustomer', 'dimension', dimColor);
+      svg += box(170, 300, 110, 44, 'DimStore', 'dimension', dimColor);
+      svg += box(590, 300, 110, 44, 'DimDate', 'dimension', dimColor);
+      svg += box(50,  40,  100, 38, 'Category', 'sub-dim', subdimColor);
+      svg += box(50,  160, 100, 38, 'Brand', 'sub-dim', subdimColor);
+      svg += box(710, 40,  100, 38, 'Geography', 'sub-dim', subdimColor);
+      svg += box(50,  340, 100, 38, 'Region', 'sub-dim', subdimColor);
+      svg += line(225, 100, 320, 185);
+      svg += line(535, 100, 440, 185);
+      svg += line(225, 300, 320, 215);
+      svg += line(535, 300, 440, 215);
+      svg += line(100, 40,  145, 90,  { stroke: 'var(--ink-3)' });
+      svg += line(100, 160, 145, 115, { stroke: 'var(--ink-3)' });
+      svg += line(660, 40,  605, 90,  { stroke: 'var(--ink-3)' });
+      svg += line(100, 340, 145, 310, { stroke: 'var(--ink-3)' });
+      svg += `<text x="380" y="20" text-anchor="middle" font-family="Source Serif 4, serif" font-style="italic" font-size="13" fill="var(--ink-3)">dimensions branch into sub-dimensions — extra joins, more hops</text>`;
+      return svg;
+    },
+    star: () => {
+      let svg = '';
+      svg += box(380, 200, 140, 56, 'FactSales', 'fact · measurements', factColor);
+      svg += box(170, 90,  120, 46, 'DimProduct', 'dimension', dimColor);
+      svg += box(590, 90,  120, 46, 'DimCustomer', 'dimension', dimColor);
+      svg += box(120, 230, 120, 46, 'DimStore', 'dimension', dimColor);
+      svg += box(640, 230, 120, 46, 'DimSalesRep', 'dimension', dimColor);
+      svg += box(170, 330, 120, 46, 'DimGeography', 'dimension', dimColor);
+      svg += box(590, 330, 120, 46, 'DimDate', 'dimension', dimColor);
+      svg += line(225, 100, 320, 188);
+      svg += line(535, 100, 440, 188);
+      svg += line(180, 220, 315, 205);
+      svg += line(580, 220, 445, 205);
+      svg += line(225, 320, 325, 218);
+      svg += line(535, 320, 435, 218);
+      svg += `<text x="380" y="20" text-anchor="middle" font-family="Source Serif 4, serif" font-style="italic" font-size="13" fill="var(--ink-3)">flat dimensions point straight at the fact — one-to-many, single direction</text>`;
+      return svg;
+    }
+  };
+
+  const metaByLayout = {
+    flat: { perf: ['Slow',  'bad'],  dax: ['Painful', 'bad'], maint: ['Brittle', 'bad'] },
+    snow: { perf: ['Mixed', 'ok'],   dax: ['Tricky',  'ok'],  maint: ['Fragile', 'ok']  },
+    star: { perf: ['Fast',  'good'], dax: ['Simple',  'good'],maint: ['Easy',    'good'] }
+  };
+
+  function setSchema(name) {
+    schemaContent.innerHTML = layouts[name]();
+    const meta = metaByLayout[name];
+    mPerf.textContent  = meta.perf[0];  mPerf.className  = 'schema-meta-val ' + meta.perf[1];
+    mDax.textContent   = meta.dax[0];   mDax.className   = 'schema-meta-val ' + meta.dax[1];
+    mMaint.textContent = meta.maint[0]; mMaint.className = 'schema-meta-val ' + meta.maint[1];
+    document.getElementById('sc-flat').classList.toggle('active', name === 'flat');
+    document.getElementById('sc-snow').classList.toggle('active', name === 'snow');
+    document.getElementById('sc-star').classList.toggle('active', name === 'star');
+  }
+
+  document.getElementById('sc-flat').addEventListener('click', () => setSchema('flat'));
+  document.getElementById('sc-snow').addEventListener('click', () => setSchema('snow'));
+  document.getElementById('sc-star').addEventListener('click', () => setSchema('star'));
+  setSchema('star');
+</script>
+
+</body>
+</html>

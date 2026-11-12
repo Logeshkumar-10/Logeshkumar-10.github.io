@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>An Al-Assisted Workflow for Real Business Reporting: Beyond Dashboards | Logeshkumar Sivakumar</title>
+  <meta name="description" content="One fictional company, nine departments, every report written for a named audience and a real decision. Here is the idea, the process, and where AI did the" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Article</span>
+    <h1>An Al-Assisted Workflow for Real Business Reporting: Beyond Dashboards</h1>
+    <p class="muted">Logeshkumar Sivakumar · October 9, 2026 · 9 min read</p>
+    <img class="cover" src="../assets/blog/an-al-assisted-workflow-for-real-business-reporting-beyond/cover.jpg" width="1200" height="675" alt="" />
+<p>One fictional company, nine departments, every report written for a named audience and a real decision. Here is the idea, the process, and where AI did the heavy lifting.</p>
+<p>Most industry demos fall apart the first time a director asks a real question. The data is a toy, the dashboard has three charts, and nobody can say who the report is for or which decision it supports.</p>
+<p>I wanted to try the opposite: a complete report suite for one company, built the way a real client engagement runs. AI did the heavy lifting. I made every decision that mattered.</p>
+<figure><img src="../assets/blog/an-al-assisted-workflow-for-real-business-reporting-beyond/image1.jpg" alt="" loading="lazy"><figcaption>Report Suite in Numbers</figcaption></figure>
+<h2>The Idea</h2>
+<p>The company is fictional: a mid-sized group with several business lines and the usual departments around them. Leadership, finance, sales, marketing, operations, people and compliance all ask different questions about the same business, at different rhythms.</p>
+<p>One dashboard can't serve all of them. A suite can, if every report has one audience and one job. The work followed five stages, always in this order:</p>
+<figure><img src="../assets/blog/an-al-assisted-workflow-for-real-business-reporting-beyond/image2.jpg" alt="" loading="lazy"><figcaption>Five Stages of Report creation</figcaption></figure>
+<h2>Start with questions, not charts</h2>
+<p>Before any data existed, I wrote the report catalogue: 39 reports across nine business areas. Each entry names the decision it supports, who reads it and how often. "<strong>Which deals are stuck?</strong>" is for sales managers, every day. "<strong>Will the year land on budget?</strong>" is for the board, every month.</p>
+<p>That list decided everything that followed, including which data had to exist and which measures the model needed.</p>
+<h2>Data that behaves like a business</h2>
+<p>Realistic data is where most demos cut corners, so I built a dedicated skill for it.</p>
+<h2>Demo Dataset Creator (Claude Skill)</h2>
+<p>My <a href="https://www.linkedin.com/pulse/enterprise-power-bi-demo-automation-claude-dataset-dax-sivakumar-uav4c/" target="_blank" rel="noopener"><strong>Demo Dataset Creator</strong></a> skill generates demo-ready datasets for any industry and audience. It starts by asking a short set of intake questions about the industry, the audience and the story the data needs to tell, and only then generates anything. A realism engine then shapes every table:</p>
+<ul><li><strong>Seasons and events.</strong> Holiday peaks, quiet months and market shocks appear where a reader would expect them.</li><li><strong>Local detail.</strong> Names, places and customer mixes match the geography.</li><li><strong>Numbers that reconcile.</strong> Lines add up to totals and ledgers tie out exactly, so no figure contradicts another.</li><li><strong>Plans as well as actuals.</strong> Actual, budget and forecast versions, with dates that run into the future so reports behave as if they're live.</li></ul>
+<p>The output is a repeatable, documented dataset, with a guide for report users and a technical guide for developers. For this suite it produced 68 tables.</p>
+<h2>A model built around the questions</h2>
+<p>Data alone doesn't answer anything. My second skill turns the dataset into a Power BI semantic model.</p>
+<h2>Enterprise PBIX Model Builder (Claude Skill)</h2>
+<p>My <a href="https://www.linkedin.com/pulse/enterprise-power-bi-demo-automation-claude-dataset-dax-sivakumar-uav4c/" target="_blank" rel="noopener"><strong>PBIX Model Creator</strong></a> skill runs straight after the dataset skill, or on its own from an existing Power BI file, and produces a model that's ready for report building:</p>
+<ul><li>A star schema with the relationships already in place.</li><li>Business measures grouped into folders by department, so each team finds its own numbers.</li><li>A plain-language description on every table, column and measure.</li><li>Documentation for both business users and developers.</li></ul>
+<p>From that base the model grew report by report, ending at around 900 measures in one shared model that all 39 reports use.</p>
+<h2>Report building, in stages</h2>
+<p>Report design has its own skill too. It works in stages, so each decision is agreed before the next one starts.</p>
+<h2>Microsoft Skill for Fabric · powerbi-report-cli</h2>
+<p>Microsoft’s <a href="https://github.com/microsoft/skills-for-fabric/tree/main/skills/powerbi-report-cli" target="_blank" rel="noopener"><strong>Skill for Power BI</strong></a> reports covers requirements, design, authoring, and publishing. It asks scoping questions first, then works in the mode that fits the request, and it does not build or publish until you approve the plan. It can also validate the report files it writes before anything reaches a Fabric workspace.</p>
+<ul><li>Planning. Turns requirements into a page plan and a locked report spec, then waits for your approval.</li><li>Design. Recommends page layout, chart choices, colour, and accessibility, with a design brief for each page.</li><li>Authoring. Writes the local report files and validates them, without publishing.</li><li>Management. Publishes the report to a Fabric workspace and handles updates and rebinding.</li></ul>
+<p>The skill does not handle semantic model or DAX work, so that part of this build used the dataset and model skills described above.</p>
+<h2>One pilot, then a rulebook</h2>
+<p>The first report took the longest, on purpose. I reviewed it round after round: layout, wording, colors, what a click should do, where help should live. Every piece of feedback became a written rule. By sign-off the rulebook covered points like these:</p>
+<ul><li>Every page reads like a website and fits one screen, with no scrolling.</li><li>Every page and every visual has help text.</li><li>A click filters the whole page; it never just highlights.</li><li>Titles stay plain, with at most one data-driven story per page.</li><li>Each department gets its own look, so no report feels copy pasted.</li></ul>
+<p>From then on, every new report had to pass those rules automatically before I reviewed it.</p>
+<figure><img src="../assets/blog/an-al-assisted-workflow-for-real-business-reporting-beyond/image3.jpg" alt="" loading="lazy"><figcaption>Sample images of Real estate industry report from 100+ pages, each in its own style and theme</figcaption></figure>
+<p>Same rules everywhere, a different look for each department. The rulebook keeps the quality consistent, and the design keeps each audience at home.</p>
+<h2>Where AI did the work, and where I stayed in charge</h2>
+<p>AI handled the research and the build. It researched the use cases for each audience, generated the demo data and semantic model with my two skills, and built every page from my report plans. It checked each build against the <strong>rulebook</strong>, and it produced the <strong>screenshots and documentation.</strong></p>
+<p>I made every decision that shaped the reports. I chose which questions each report had to answer and set the design direction for each department. I defined what good looked like on every page, decided when a report was finished, and gave the final sign-off that locked each report.</p>
+<figure><img src="../assets/blog/an-al-assisted-workflow-for-real-business-reporting-beyond/image4.jpg" alt="" loading="lazy"><figcaption> AI handled the research and the build. I made every decision</figcaption></figure>
+<p>All 39 reports went through the same loop: build, review, adjust, sign off. AI made each loop fast. It never decided when a report was done.</p>
+<h2>When this approach fits</h2>
+<p>It fits whenever you need to show a complete, believable reporting solution before real data is available: pre-sales demos, proofs of concept, team training, or designing the target state before a platform migration.</p>
+<p>Take a regional headquarters planning a new reporting suite across several markets. The teams can agree on the questions, the model, and the design using synthetic data, so no personal data is touched while the design is still changing. That keeps privacy reviews simple. Real data is connected only after sign-off.</p>
+<h2>Why it looks simpler than it is</h2>
+<p>The screenshots make the result look straightforward. Behind them are two purpose-built skills, a rulebook shaped by many review rounds, and automated checks that run on every build. That groundwork took the time, and it's also what makes the next industry suite much faster to deliver.</p>
+<h2>What comes next: Claude Dashboards and Claude Motion</h2>
+<p>In October 2026, <a href="https://www.linkedin.com/company/anthropicresearch/" target="_blank" rel="noopener"><strong>Anthropic</strong></a> announced two beta features that fit parts of this process. </p>
+<p><a href="https://www.linkedin.com/showcase/claude/" target="_blank" rel="noopener"><strong>Claude</strong></a> <strong>Dashboards</strong> lets you ask a question in plain language and builds a live dashboard from connected data platforms such as <a href="https://www.linkedin.com/company/snowflake-computing/" target="_blank" rel="noopener"><strong>Snowflake</strong></a> , <a href="https://www.linkedin.com/company/databricks/" target="_blank" rel="noopener"><strong>Databricks</strong></a> , and <a href="https://www.linkedin.com/company/big-query/" target="_blank" rel="noopener"><strong>BIGQUERY</strong></a> , with each chart showing when its data was last refreshed. Claude Motion builds short, animated explainers and animated charts from a written description and exports them as MP4 files.</p>
+<p>I plan to use them in three ways. </p>
+<ol><li><strong>Claude</strong> <strong>Dashboards</strong> will be used to test a business question against a data source before it becomes a page in the suite. </li><li><strong>Claude Motion</strong> will turn the five-stage workflow into a short, animated explainer for <a href="https://www.linkedin.com/company/linkedin/" target="_blank" rel="noopener"><strong>LinkedIn</strong></a> video and the webinar series. </li><li>The Reports, the shared Semantic model with <a href="https://www.linkedin.com/company/microsoft-fabric-world/" target="_blank" rel="noopener"><strong>Microsoft Fabric</strong></a> , and the Rulebook will stay in <a href="https://www.linkedin.com/showcase/microsoftpowerbi/" target="_blank" rel="noopener"><strong>Power BI</strong></a>. </li></ol>
+<p>Anthropic describes Claude Dashboards as best suited to quick, exploratory questions rather than deep analysis, so governed, multi-page reporting still belongs in Power BI.</p>
+<h2>A Note on AI-Assisted Workflows</h2>
+<p>Every file this pipeline produces goes through manual review before it is used in a demo. The dataset, bim structure, DAX logic, relationships, measure descriptions, page layout, visual types and report interaction options are validated against the actual dataset and use case before deployment.</p>
+<p>AI compresses the time between starting and having something to review - it does not replace the review itself. Always validate before sharing. The output is a strong starting point, not a finished product.</p>
+<p>For teams exploring industry-specific analytics at scale, there's plenty more to discuss. 💬</p>
+<h2>References</h2>
+<ul><li><a href="https://www.linkedin.com/pulse/enterprise-power-bi-demo-automation-claude-dataset-dax-sivakumar-uav4c/" target="_blank" rel="noopener"><strong>Enterprise Power BI Demo Automation with Claude - Dataset Generation, Semantic Modelling, and DAX in One Session</strong></a></li><li><a href="https://github.com/microsoft/skills-for-fabric/tree/main/skills/powerbi-report-cli" target="_blank" rel="noopener"><strong>skills-for-fabric/skills/powerbi-report-cli at main · microsoft/skills-for-fabric</strong></a></li><li><a href="https://claude.com/resources/articles/dashboards-and-motion" target="_blank" rel="noopener"><strong>Build live dashboards and animate explainers with Claude</strong></a></li></ul>
+<p>#PowerBI #MicrosoftFabric #BusinessIntelligence #DataModeling #SemanticModel #DAX #GenerativeAI #DataVisualization #ReportDesign #Analytics</p>
+<p>© 2026 Logeshkumar Sivakumar. All rights reserved. The company, people and figures shown are fictional.</p>
+<p>Linkedin post content<br>Most AI demos show a prompt and a finished dashboard. The real work happened in between.<br><br>I built a full <a href="https://www.linkedin.com/showcase/microsoftpowerbi/" target="_blank" rel="noopener"><strong>Power BI</strong></a> report suite using <a href="https://www.linkedin.com/showcase/claude/" target="_blank" rel="noopener"><strong>Claude</strong></a> and two skills I wrote. The useful part was not speed. It was deciding where my judgment mattered.<br><br>1. The First skill 𝗴𝗲𝗻𝗲𝗿𝗮𝘁𝗲𝗱 𝘁𝗵𝗲 𝗱𝗮𝘁𝗮, starting with questions about the industry, audience, and story. It added seasonal peaks, local detail, and figures that reconcile.<br>2. The Second skill 𝗯𝘂𝗶𝗹𝘁 𝘁𝗵𝗲 𝘀𝗲𝗺𝗮𝗻𝘁𝗶𝗰 𝗺𝗼𝗱𝗲𝗹, with a star schema, department-grouped measures, and plain-language descriptions throughout.<br>3. The 𝗳𝗶𝗿𝘀𝘁 𝗿𝗲𝗽𝗼𝗿𝘁 𝘄𝗮𝘀 𝗮 𝗽𝗶𝗹𝗼𝘁. Every piece of feedback became a rule, such as one screen per page, help text on every visual, and whole-page filtering on click.<br>4. Every later report had to pass those rules before I reviewed it. When a rule changed, I updated the existing reports as well, so the whole suite stayed consistent.<br><br>AI researched each audience’s needs, built every page from my report plans, checked each build against the rulebook, and produced the screenshots and documentation.<br><br>I decided which questions each report had to answer, what good looked like on every page, and when a report was finished.<br><br>𝗧𝗵𝗲 𝗹𝗲𝘀𝘀𝗼𝗻 𝗜 𝘁𝗼𝗼𝗸 𝗮𝘄𝗮𝘆: AI made every loop faster, but it never decided when a report was done. Every new report would need the review from scratch.<br><br>𝗥𝗲𝗮𝗱 𝗙𝘂𝗹𝗹 𝗮𝗿𝘁𝗶𝗰𝗹𝗲 𝗯𝗲𝗹𝗼𝘄👇<br><br><a href="https://www.linkedin.com/company/microsoft/" target="_blank" rel="noopener"><strong>Microsoft</strong></a> <a href="https://www.linkedin.com/showcase/microsoftpowerbi/" target="_blank" rel="noopener"><strong>Power BI</strong></a> <a href="https://www.linkedin.com/company/anthropicresearch/" target="_blank" rel="noopener"><strong>Anthropic</strong></a> <a href="https://www.linkedin.com/showcase/claude/" target="_blank" rel="noopener"><strong>Claude</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23powerbi&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#PowerBI</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23businessintelligence&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#BusinessIntelligence</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23datamodeling&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#DataModeling</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23generativeai&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#GenerativeAI</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23datavisualization&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#DataVisualization</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23reportdesign&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#ReportDesign</strong></a></p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

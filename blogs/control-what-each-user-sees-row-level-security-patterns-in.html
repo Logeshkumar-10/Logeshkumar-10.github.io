@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control What Each User Sees: Row-Level Security Patterns in Power BI | Logeshkumar Sivakumar</title>
+  <meta name="description" content="You publish one report. Fifty people open it. Every single one of them sees every row of data." />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Article</span>
+    <h1>Control What Each User Sees: Row-Level Security Patterns in Power BI</h1>
+    <p class="muted">Logeshkumar Sivakumar · June 18, 2026 · 5 min read</p>
+    <img class="cover" src="../assets/blog/control-what-each-user-sees-row-level-security-patterns-in/cover.jpg" width="1200" height="675" alt="" />
+<p>You publish one report. Fifty people open it. Every single one of them sees every row of data.</p>
+<p>That is the default. And in most enterprise scenarios, that is wrong.</p>
+<p><strong>Row-Level Security</strong> in Power BI fixes this at the semantic model level. You define roles with DAX filter expressions. Every row is evaluated against that filter. Rows that return TRUE are visible. Everything else disappears. The user never sees the filter. They just see their data.</p>
+<h2>Two Ways to Define a Role</h2>
+<p>The first approach is <strong><em>Static RLS</em></strong>. You hardcode the filter directly into the role definition.</p>
+<figure><img src="../assets/blog/control-what-each-user-sees-row-level-security-patterns-in/image1.jpg" alt="" loading="lazy"><figcaption>Static RLS</figcaption></figure>
+<p>Clean and simple. But it does not scale. Five regions means five roles. Twenty regions means twenty roles. Every time the org chart changes, someone has to update the role.</p>
+<p><strong><em>Dynamic RLS</em></strong> replaces all of that with a single role that adapts to whoever is logged in. The USERPRINCIPALNAME() function returns the signed-in user's email from Power BI Service. A SecurityMapping table connects that email to their allowed region. One role. All users.</p>
+<figure><img src="../assets/blog/control-what-each-user-sees-row-level-security-patterns-in/image2.jpg" alt="" loading="lazy"><figcaption>Dynamic RLS</figcaption></figure>
+<p>arun@company.com opens the report and sees North. bhavna@company.com opens the same report and sees South. Same role definition. Same published dataset. Completely different views. This is the enterprise standard.</p>
+<h2>Pattern 1: Role Hierarchy (Admin Sees All, Others See Their Region)</h2>
+<p>Region-based filtering works until you have users at different access levels sharing the same report. An admin needs to see everything. A regional manager needs to see only their region. A single flat role cannot handle both.</p>
+<p>The fix is to add a RoleLevel column to the SecurityMapping table and use VAR to evaluate the user's level before applying any filter.</p>
+<figure><img src="../assets/blog/control-what-each-user-sees-row-level-security-patterns-in/image3.jpg" alt="" loading="lazy"><figcaption>Hierarchy RLS</figcaption></figure>
+<p>When UserRoleLevel is "Admin", the first condition returns TRUE immediately. No region filter is applied. The admin sees every row. For everyone else, only their assigned region passes through. One role definition handles both cases cleanly.</p>
+<p>Always use VAR for multi-condition RLS. Nested LOOKUPVALUE calls inside a single RETURN expression become unreadable and are extremely difficult to debug when something breaks in production.</p>
+<h2>Pattern 2: Manager Sees Their Subordinates' Data</h2>
+<p>Role hierarchy solves the admin problem. It does not solve the manager problem.</p>
+<p>A regional manager should see sales data for every employee reporting to them, not just the rows tagged to their region. If the data is already region-aligned, region-based RLS covers it. But in cross-region teams, that assumption breaks.</p>
+<p>The clean solution is to add a ManagerEmail column directly to the DimEmployee table and filter on the relationship, not just the region.</p>
+<figure><img src="../assets/blog/control-what-each-user-sees-row-level-security-patterns-in/image4.jpg" alt="" loading="lazy"><figcaption>Org Hierarchy RLS</figcaption></figure>
+<p>Apply this filter to the DimEmployee table. The first condition lets a user see their own employee row. The second condition lets their manager see them. The third condition lets admins through entirely. Power BI propagates the filter from DimEmployee to FactSales through the relationship automatically.</p>
+<p>This pattern scales directly to any org structure where access follows reporting lines rather than geographic regions.</p>
+<h2>Pattern 3: User-Scoped KPI Measures: Lock a KPI Card data to the Logged-In User Regardless of Slicers</h2>
+<p>RLS filters rows. It does not freeze visuals.</p>
+<p>Here is the gap: a user with North access opens the report. They select South in the region slicer. The KPI card now shows blank or zero because they have no South data. That is confusing to the end user and looks like a broken report.</p>
+<p>The problem is not RLS. RLS is doing its job correctly. The problem is that the KPI card is responding to the slicer when it should be ignoring it.</p>
+<p>The fix is a <strong>DAX measure</strong> using CALCULATE<strong> </strong>to hardcode the filter to whoever is logged in, making the slicer irrelevant to that specific card.</p>
+<pre><code>-- Measure: always returns the logged-in user's region total, ignores slicer selection
+My Region Sales =
+VAR MyRegion = LOOKUPVALUE(
+    SecurityMapping[AllowedRegion],
+    SecurityMapping[UserEmail],
+    USERPRINCIPALNAME()
+)
+RETURN
+CALCULATE(
+    SUM(FactSales[NetAmount]),
+    DimCustomer[Region] = MyRegion
+)</code></pre>
+<p>Here is what happens step by step:</p>
+<ol><li>USERPRINCIPALNAME() captures the logged-in user's email</li><li>LOOKUPVALUE looks up their assigned region from the SecurityMapping table</li><li>CALCULATE applies that region as a hard filter on FactSales, overriding whatever the slicer says</li></ol>
+<p>arun@company.com logs in. The KPI card reads North and locks to it. He selects South in the slicer to explore the rest of the report. The card stays on North. It does not move.</p>
+<p>Use this pattern for any "My Numbers" card in an executive or regional dashboard where a personal metric should never be affected by exploratory filtering elsewhere on the page.</p>
+<h2>The Limitation Most Teams Miss</h2>
+<ul><li>Dataset owners in Power BI Service bypass RLS entirely. Role assignments have no effect on them. They always see all data. Before publishing, confirm whether the dataset owner should have unrestricted access. In regulated environments this is a compliance checkpoint, not a technical footnote.</li><li>Always apply RLS filters to dimension tables, not fact tables. Power BI propagates the filter through model relationships to the fact table automatically.</li><li>After building your roles in Power BI Desktop, three steps remain: publish the semantic model, assign users to roles in Power BI Service under Dataset Settings, and verify each role using "Test as role" to confirm the filters behave as expected.</li></ul>
+<p>Which RLS pattern have you implemented in production? Share your approach in the comments. 💬</p>
+<p>Reference: <a href="https://learn.microsoft.com/en-us/fabric/security/service-admin-row-level-security" target="_blank" rel="noopener"><strong>Row-level security (RLS) with Power BI, Microsoft Learn</strong></a></p>
+<p>#PowerBI #MicrosoftFabric #RowLevelSecurity #DAX #DataSecurity #DataGovernance #BIDeveloper #SemanticModel #BusinessIntelligence</p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

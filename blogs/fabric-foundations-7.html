@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SQL Database in Microsoft Fabric: The OLTP Store That Mirrors Itself into OneLake | Logeshkumar Sivakumar</title>
+  <meta name="description" content="SQL database in Microsoft Fabric is the platform’s transactional (OLTP) store, built for applications that write many small transactions at once. It mirror" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Fabric Foundations · Part 7</span>
+    <h1>SQL Database in Microsoft Fabric: The OLTP Store That Mirrors Itself into OneLake</h1>
+    <p class="muted">Logeshkumar Sivakumar · November 10, 2026 · 5 min read</p>
+    <img class="cover" src="../assets/blog/fabric-foundations-7/cover.jpg" width="1200" height="675" alt="" />
+<p>SQL database in Microsoft Fabric is the platform’s transactional (OLTP) store, built for applications that write many small transactions at once. It mirrors its data into OneLake as Delta Parquet automatically, so operational data becomes analytics-ready without an ETL pipeline.</p>
+<p>Here is the situation that exposes the gap. An app writes thousands of small orders a minute, and the business wants dashboards on the same data. Most people reach for the Warehouse or the Lakehouse. Both are analytical engines, and you have just handed them a transactional job.</p>
+<h2>What is SQL database in Microsoft Fabric?</h2>
+<p>SQL database in Microsoft Fabric is a fully managed transactional relational database that lives as an item in a Fabric workspace and runs on the same SQL Database Engine as SQL Server. It is closely related to Azure SQL Database, so your T-SQL, stored procedures, views and functions carry straight over.</p>
+<p>Create one and Fabric provisions two things: the database itself, and a SQL analytics endpoint. No servers, no patching. Indexing and tuning are handled for you.</p>
+<h2>Why put an OLTP database inside an analytics platform?</h2>
+<p>Because the operational database usually lives somewhere else, and getting its data into analytics means building pipelines and then babysitting them. That is cost, latency and a steady source of breakage.</p>
+<p>Put the database on the same storage layer and the gap closes. You stop building ETL just to analyse operational data. And analytics queries never touch the transactional database, so a heavy report cannot slow the app down.</p>
+<h2>How does the mirroring into OneLake work?</h2>
+<p>Mirroring starts the moment the database is created. No action, no settings. Every supported table and its supported columns are mirrored as soon as they exist, and the mirroring cannot be turned off.</p>
+<p>A replication engine reads the SQL engine’s change feed, captures inserts, updates and deletes, and writes them into OneLake as Delta Parquet in near real time. The transactional data stays in .mdf files. The SQL analytics endpoint points at the Delta copy, and that copy is read-only.</p>
+<p>Try an INSERT through the endpoint and it refuses. That refusal is the design. It protects operational data from accidental writes.</p>
+<p>From there, mirrored tables behave like any other Fabric data. Create views on the endpoint, join across Warehouse and Lakehouse tables in the same workspace, or read them from notebooks and shortcuts.</p>
+<h2>When should you choose SQL database over a Warehouse?</h2>
+<p>Choose SQL database when the workload is transactional: many small concurrent reads and writes, point lookups. The Warehouse also supports T-SQL writes, which is exactly why people get this one wrong. It is an analytical engine built for bulk, set-based work. Fabric’s own data store decision guide sends OLTP workloads to SQL database.</p>
+<p>The comparison below puts all five Fabric data stores side by side. Every one of them lands its data in OneLake, and each is tuned for a different job.</p>
+<figure><img src="../assets/blog/fabric-foundations-7/image1.jpg" alt="" loading="lazy"><figcaption>The five Microsoft Fabric data stores at a glance</figcaption></figure>
+<h2>Four patterns make the choice concrete:</h2>
+<ul><li>Intelligent applications and AI, using vector data types and vector search</li><li>Reverse ETL, pushing curated analytical results back into the operational store</li><li>Operational data store, a near real-time, harmonized store across source systems</li><li>Translytical applications, where one dataset serves both writes and analysis</li></ul>
+<p>Reverse ETL is the one BI people underestimate. A churn score sitting in a Lakehouse helps nobody until the CRM can read it.</p>
+<h2>What mistake does this save you from?</h2>
+<p>Building a pipeline to copy the database into OneLake. Mirroring already lands that data, so the pipeline only duplicates it.</p>
+<p>Before the next design review asks “which store?”, ask a simpler question first: does this workload write, or only read? Subscribe to <strong>Fabric Foundations</strong> for the next edition.</p>
+<h2>Previous in this series: Fabric Warehouse: What it is for, and when read-only stops being enough</h2>
+<h2>References:</h2>
+<ul><li>SQL database in Microsoft Fabric: <a href="http://learn.microsoft.com/" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a> </li><li>Mirroring Fabric SQL database in Microsoft Fabric: <a href="http://learn.microsoft.com/" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a> </li><li>Microsoft Fabric decision guide: choose a data store: <a href="https://learn.microsoft.com/fabric/fundamentals/decision-guide-data-store" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a></li></ul>
+<p>#SQLDatabaseInFabric #OLTP #Mirroring #OneLake #DeltaLake #MicrosoftFabric #DataEngineering #PowerBI</p>
+<p>Post content<br>𝐒𝐐𝐋 D𝐚𝐭𝐚𝐛𝐚𝐬𝐞 𝐢𝐧 𝐅𝐚𝐛𝐫𝐢𝐜 is a fully managed transactional database that lives inside your workspace.<br><br>Most Fabric developers learn the analytical stores first. Then an app team shows up needing thousands of small writes a minute, and none of those stores fit.<br><br>That’s the real gap. Not how to query data. It’s knowing what SQL database in Fabric is, and when it is the right store.<br><br>Inside this edition of 𝗙𝗮𝗯𝗿𝗶𝗰 𝗙𝗼𝘂𝗻𝗱𝗮𝘁𝗶𝗼𝗻𝘀:<br>1️⃣ What SQL database in Fabric is, and what gets provisioned when you create one<br>2️⃣ Why the Warehouse is the wrong backend for a transactional app, even though it accepts writes<br>3️⃣ The four patterns: AI apps, reverse ETL, operational data store, translytical<br>4️⃣ How operational data becomes analytics ready without an ETL pipeline<br><br>If you’ve ever wondered where the application database fits in Fabric, this one’s for you.<br><br>Same engine as SQL Server. Full T-SQL. No servers to run.<br><br>Read the new edition of 𝗙𝗮𝗯𝗿𝗶𝗰 𝗙𝗼𝘂𝗻𝗱𝗮𝘁𝗶𝗼𝗻𝘀 and subscribe for the next one<br><br><a href="https://www.linkedin.com/company/microsoft/" target="_blank" rel="noopener"><strong>Microsoft</strong></a> <a href="https://www.linkedin.com/company/microsoft-fabric-world/" target="_blank" rel="noopener"><strong>Microsoft</strong></a><a href="https://www.linkedin.com/company/microsoft-fabric-world/" target="_blank" rel="noopener"><strong> Fabric</strong></a> <a href="https://www.linkedin.com/showcase/microsoftpowerbi/" target="_blank" rel="noopener"><strong>Power BI</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23sqldatabaseinfabric&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#SQLDatabaseInFabric</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23oltp&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#OLTP</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23mirroring&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#Mirroring</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23onelake&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#OneLake</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23deltalake&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#DeltaLake</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23microsoftfabric&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#MicrosoftFabric</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23dataengineering&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#DataEngineering</strong></a> <a href="https://www.linkedin.com/search/results/all/?keywords=%23powerbi&amp;origin=HASH_TAG_FROM_FEED" target="_blank" rel="noopener"><strong>#PowerBI</strong></a></p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

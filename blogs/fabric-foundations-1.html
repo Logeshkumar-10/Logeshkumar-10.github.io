@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fabric Foundations: The Mental Model Behind Microsoft Fabric | Logeshkumar Sivakumar</title>
+  <meta name="description" content="Most people start Microsoft Fabric by opening a notebook or building a report, then get stuck two steps in because nobody gave them the map first: what Fab" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Fabric Foundations · Part 1</span>
+    <h1>Fabric Foundations: The Mental Model Behind Microsoft Fabric</h1>
+    <p class="muted">Logeshkumar Sivakumar · July 29, 2026 · 4 min read</p>
+    <img class="cover" src="../assets/blog/fabric-foundations-1/cover.jpg" width="1200" height="675" alt="" />
+<p>Most people start <a href="https://www.linkedin.com/company/microsoft/" target="_blank" rel="noopener">Microsoft</a> Fabric by opening a notebook or building a report, then get stuck two steps in because nobody gave them the map first: what Fabric actually is, where the data lives, and which item to create for which job. That gap costs weeks.</p>
+<h2>What Microsoft Fabric Actually Is</h2>
+<p>Microsoft Fabric is a single software-as-a-service analytics platform that replaces a stack of separate tools with one product. Instead of stitching together a data lake, a warehouse, a streaming service, and a BI tool, you get all of it as workloads inside one platform, sharing one storage layer and one security model.</p>
+<p>The workloads worth knowing by name: <strong>Data Engineering</strong> (Lakehouse and Spark), <strong>Data Factory</strong> (pipelines and Dataflow Gen2), <strong>Data Warehouse, Real-Time Intelligence</strong> (Eventhouse and Eventstream), <strong>Databases</strong> (SQL Database and Cosmos DB), <strong>Data Science,</strong> and <strong>Power BI</strong>. Everything you build in any of these, a Lakehouse, a pipeline, a report, is called an item. Items live in a workspace. Workloads produce items, items live in workspaces, and all the underlying data lands in one place: OneLake.</p>
+<h2>Why One Storage Layer Changes the Rest of the Decisions</h2>
+<p><strong>OneLake</strong> is Fabric's single, unified logical data lake for the entire tenant. It's provisioned automatically, and every workload writes to it in open Delta Parquet format. That single detail is why Spark, T-SQL, KQL, and Power BI can all read the same physical copy of a table with no conversion step and no separate sync job to maintain.</p>
+<p><strong>Shortcuts </strong>extend that further. A shortcut is a reference to data that lives somewhere else (another workspace, or external storage like S3, ADLS, or GCS) without physically copying it. You query it as if it were sitting locally. That's how Fabric lets you unify data across locations without multiplying copies of the same table.</p>
+<h2>The Decision Every Project Starts With</h2>
+<p>Before writing a line of code, every Fabric project answers one question: where should this data live? Get it wrong and you spend months fighting the platform.</p>
+<ul><li><strong>Lakehouse</strong>: developing with Spark, or handling unstructured or mixed data</li><li><strong>Warehouse</strong>: T-SQL with full multi-table transactions on structured data</li><li><strong>Eventhouse</strong>: streaming events or telemetry that need real-time analytics</li><li><strong>SQL Database</strong>: an operational app with many small reads and writes</li><li><strong>Cosmos DB</strong>: NoSQL documents or vector search for an AI workload</li></ul>
+<p>These stores aren't competing options, they cooperate. A common pattern is landing raw, large data in a Lakehouse, then serving curated, modeled data from a Warehouse or a Direct Lake semantic model on top of it.</p>
+<h2>Capacity, Capacity Units, and SKU</h2>
+<p>Every workspace runs on a capacity, which is the compute you're actually paying for. Capacity is measured in <strong>Capacity Units (CU)</strong> and sized by <strong>SKU</strong>, labeled F2, F4, F8, and upward, where a larger number means more CU available. A commonly used threshold is the F64 SKU, at or above which report consumers do not each need a per-user Power BI license.</p>
+<p>Every workload in a workspace draws from that same pool: Spark jobs, Warehouse queries, and Direct Lake all consume CU. Fabric absorbs short spikes through bursting and smoothing, but sustained overuse triggers throttling, where operations slow down or queue. This is the part beginners skip and then get burned by exactly when it matters most, during a month-end reporting crunch when every job wants compute at once.</p>
+<h2>Where This Shows Up in Practice</h2>
+<p>A team consolidating separate lake, warehouse, and BI tooling into Fabric isn't just simplifying their architecture diagram. They're removing the sync jobs that kept five copies of the same table in sync, giving every engine one governed source of truth, and getting a single, predictable compute bill tied to SKU size instead of five separate infrastructure line items.</p>
+<h2>The Takeaway</h2>
+<p>Fabric's whole design rests on three ideas: <strong>one open storage layer underneath every workload</strong>, a decision tree for picking the right store on top of it, and a shared capacity pool that all of it draws from. Learn that map before you open a notebook, and everything else in Fabric starts making sense faster.</p>
+<p>What tripped you up when you first started with Fabric? Curious what beginners are running into right now. 💬</p>
+<h2>References:</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/fabric/onelake/onelake-overview" target="_blank" rel="noopener"><strong>OneLake overview – Microsoft Learn</strong></a></li><li><a href="https://learn.microsoft.com/en-us/fabric/get-started/decision-guide-data-store" target="_blank" rel="noopener"><strong>Microsoft Fabric decision guide: choose a data store – Microsoft Learn</strong></a></li><li><a href="https://learn.microsoft.com/en-us/fabric/enterprise/licenses" target="_blank" rel="noopener"><strong>Understand Microsoft Fabric licenses – Microsoft Learn</strong></a></li></ul>
+<p>#MicrosoftFabric #DataEngineering #OneLake #PowerBI #Lakehouse #DataWarehouse #FabricAnalytics #FabricCapacityunits </p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

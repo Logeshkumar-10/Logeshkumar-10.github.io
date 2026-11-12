@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Highlight the Past, Not Just the Present -Dynamic 6-Month Views in Power BI | Logeshkumar Sivakumar</title>
+  <meta name="description" content="Power BI excels at turning data into compelling visuals. In many real-world reporting scenarios, one common business requirement is to view rolling time wi" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Article</span>
+    <h1>Highlight the Past, Not Just the Present -Dynamic 6-Month Views in Power BI</h1>
+    <p class="muted">Logeshkumar Sivakumar · June 13, 2025 · 3 min read</p>
+    <img class="cover" src="../assets/blog/highlight-the-past-not-just-the-present-dynamic-6-month/cover.jpg" width="1200" height="675" alt="" />
+<h2>📘 Introduction</h2>
+<p>Power BI excels at turning data into compelling visuals. In many real-world reporting scenarios, one common business requirement is to view rolling time window, especially when analyzing trends.</p>
+<p>A typical use case might be:</p>
+<p>"Show data for the <strong>last 6 months</strong>, ending with the <strong>month selected in a slicer</strong>."</p>
+<p>However, Power BI filters data specific to the selected month.</p>
+<p>This blog walks you through exactly how to implement that scenario. </p>
+<h2>🛠️ Implementation Strategy</h2>
+<p>To achieve this, we use a <strong>Disconnected Slicer</strong> and <strong>Dynamic DAX Measure</strong>:</p>
+<ul><li><strong>Disconnected Slicer:</strong> Create a separate DAX table "<strong>Slicer_Date</strong>" with unique Month-Year combinations and their corresponding first-of-month dates. This table isn't linked to your main data model but serves as the user's selection tool.</li></ul>
+<pre><code>Slicer_Date =
+ADDCOLUMNS(
+    SUMMARIZE('[Dim] Date', '[Dim] Date'[Year], '[Dim] Date'[Month Number]),
+    "Month Year", FORMAT(DATE([Year], [Month Number], 1), "mmm yyyy"),
+    "Date", DATE([Year], [Month Number], 1),
+    "Month Year (For Sorting)", FORMAT(DATE([Year], [Month Number], 1), "yyyymm")
+)</code></pre>
+<ul><li><strong>Dynamic DAX Measure:</strong> Create a measure "<strong>Flag Last 6 Months</strong>" to identify if a date falls within the six-month window (selected month and five prior). This measure captures the selected date, calculates the start and end of the six-month range, and returns 1 if a date is within this period.</li></ul>
+<pre><code>Flag Last 6 Months =
+VAR SelectedMonth = SELECTEDVALUE(Slicer_Date[Date])
+VAR StartDate = EDATE(SelectedMonth, -5)
+VAR EndDate = EOMONTH(SelectedMonth, 0)
+VAR CurrentDate = DATE(VALUES('[Dim] Date'[Year]), VALUES('[Dim] Date'[Month Number]), 1)
+RETURN
+IF (
+    NOT ISBLANK(SelectedMonth) &amp;&amp;
+    CurrentDate &gt;= StartDate &amp;&amp;
+    CurrentDate &lt;= EndDate,
+    1
+)</code></pre>
+<ul><li><strong>Apply as Filter:</strong> Apply "<strong>Flag Last 6 Months</strong>" as a visual-level filter, set it to 1. </li><li>Assign the '<strong>Month Year</strong>' column from the '<strong>Slicer_Date</strong>' table to the slicer.</li></ul>
+<p>Now, selecting a month (e.g., January 2025) will display data from August 2024 through January 2025.</p>
+<p>Play</p>
+<p>Dynamic 6-Month Views in Power BI</p>
+<h2>💼 Real-World Use Case</h2>
+<ul><li><strong>Finance:</strong> Analyzing six-month revenue or expense trends.</li><li><strong>Marketing:</strong> Evaluating campaign performance leading up to a peak.</li><li><strong>Sales/Product:</strong> Assessing growth patterns before a product launch.</li></ul>
+<p>This functionality is invaluable across various sectors. Rather than filtering data for a single month, this approach provides richer context and better storytelling by showcasing the build-up or trend leading into a chosen point in time.</p>
+<h2>📈 Business Value</h2>
+<ul><li><strong>Clarity and Flexibility</strong>: Enhances Power BI reports by allowing users to analyze trends over a defined recent window without manual adjustments to filters or slicers.</li><li><strong>Consistency</strong>: Ensures consistent presentation, whether for executives or internal analysis.</li><li><strong>Error Reduction</strong>: Minimizes user error by automating trend analysis.</li><li><strong>Contextual Insights</strong>: Provides insights within the relevant context.</li></ul>
+<h2>✅ Conclusion</h2>
+<p>With just a few lines of DAX and a disconnected slicer, you can transform a standard Power BI slicer into a powerful time-intelligence tool. </p>
+<p>When one month is selected, you’re not limited to only that month — you can show a <strong>rolling range of dates</strong> like the last 6 months, making your dashboard truly interactive and valuable for users, and highly reusable across reports.</p>
+<p>So, the next time your business wants to dive into past performance leading up to a milestone month, you’ll have just the right technique ready to go.</p>
+<p>💬 Have you tried something similar? Or want help implementing it in your own report? Let’s connect!</p>
+<p>Leave a comment below to unlock exclusive access to the Power BI (.pbix) file!</p>
+<p>#PowerBI #DAX #Analytics+ #Inforiver #RollingMonths #BusinessIntelligence #DataModeling #DynamicSlicer #Tableau #Fabric #DataEngineering #Dataflow #Datapipeline #Datawarehousing #Slicers #Rollingperiod #TimeIntelligence</p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>

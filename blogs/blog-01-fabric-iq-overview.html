@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Is Unified. Meaning Is Not: Understanding Microsoft Fabric IQ | Logeshkumar Sivakumar</title>
+  <meta name="description" content="Part 1 of 7: From Data to Intelligence — A Practitioner's Guide to Microsoft Fabric IQ. Understanding what Fabric IQ is and how it closes the semantic gap in enterprise data." />
+  <link rel="stylesheet" href="../css/legacy.css" />
+  <link rel="stylesheet" href="../css/blog.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body class="blog-page">
+
+  <!-- ── NAV ── -->
+  <nav id="navbar" class="scrolled">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <span class="logo-bracket">&lt;</span>LS<span class="logo-bracket">/&gt;</span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#writing" class="active">Blog</a></li>
+        <li><a href="../index.html#contact" class="nav-cta">Contact</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── BLOG HERO ── -->
+  <header class="blog-hero">
+    <div class="blog-hero-inner container">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb" aria-label="breadcrumb">
+        <a href="../index.html">Home</a>
+        <span class="bc-sep"><i class="fas fa-chevron-right"></i></span>
+        <a href="../index.html#writing">Blog</a>
+        <span class="bc-sep"><i class="fas fa-chevron-right"></i></span>
+        <span>Fabric IQ Series</span>
+      </nav>
+
+      <!-- Series pill -->
+      <div class="series-pill">
+        <i class="fas fa-layer-group"></i>
+        From Data to Intelligence: A Practitioner's Guide to Microsoft Fabric IQ
+        &nbsp;·&nbsp; <strong>Part 1 of 7</strong>
+      </div>
+
+      <h1 class="blog-title">Data Is Unified.<br />Meaning Is Not.</h1>
+      <p class="blog-subtitle">Understanding Microsoft Fabric IQ</p>
+
+      <div class="blog-meta-bar">
+        <span class="meta-item"><i class="fas fa-user"></i> Logeshkumar Sivakumar</span>
+        <span class="meta-item"><i class="far fa-calendar-alt"></i> May 2026</span>
+        <span class="meta-item"><i class="far fa-clock"></i> 5 min read</span>
+        <span class="meta-item"><i class="fas fa-tag"></i> Microsoft Fabric · AI · Data Engineering</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── BLOG BODY ── -->
+  <main class="blog-main container">
+    <div class="blog-layout">
+
+      <!-- ARTICLE -->
+      <article class="blog-article">
+
+        <p class="blog-lead">
+          You moved your data to OneLake. Your reports run on Power BI. Your AI agents can query the lakehouse. But ask two agents the same question about "Revenue" and you will get two different numbers — because one reads the CRM definition and the other reads the finance table. The data is in one place. The meaning still is not.
+        </p>
+        <p>That is the gap Microsoft Fabric IQ is built to close.</p>
+
+        <!-- ─ Section 1 ─ -->
+        <h2>What is Microsoft Fabric IQ?</h2>
+        <p>
+          Fabric IQ is a workload in Microsoft Fabric that unifies data sitting across OneLake and organises it according to the language of the business. The data is then exposed to analytics, AI agents, and applications with consistent semantic meaning and context.
+        </p>
+        <p>
+          Fabric IQ does not replace your existing data estate. It builds on top of it. Your lakehouses, eventhouses, and Power BI semantic models stay where they are. Fabric IQ adds a shared vocabulary on top of them so that every downstream tool, report, and agent reads from the same definitions.
+        </p>
+        <div class="callout callout-info">
+          <i class="fas fa-info-circle"></i>
+          <span>Introduced at Microsoft Ignite 2025, Fabric IQ is currently in <strong>public preview</strong>.</span>
+        </div>
+
+        <!-- ─ Section 2 ─ -->
+        <h2>The Six Items in the Fabric IQ Workload</h2>
+        <p>Fabric IQ is a collection of six items. Each solves a specific part of the meaning problem.</p>
+
+        <div class="fabric-items">
+
+          <div class="fabric-item">
+            <div class="fi-icon fi-navy"><i class="fas fa-sitemap"></i></div>
+            <div class="fi-body">
+              <h3>Ontology <span class="preview-tag">preview</span></h3>
+              <p>The foundation. Defines the enterprise vocabulary — entity types like <em>Customer</em> or <em>Shipment</em>, properties like <em>Customer name</em> and <em>email</em>, relationships like <em>Customer places Order</em> — and binds those definitions to real data in OneLake. Every other item in the workload reads from the Ontology.</p>
+            </div>
+          </div>
+
+          <div class="fabric-item">
+            <div class="fi-icon fi-teal"><i class="fas fa-project-diagram"></i></div>
+            <div class="fi-body">
+              <h3>Graph <span class="preview-tag">preview</span></h3>
+              <p>Provides native graph storage and compute for nodes, edges, and traversals. Handles relationship-heavy questions that flat SQL joins cannot answer — such as tracing an order through a shipment to a sensor breach to an SLA penalty.</p>
+            </div>
+          </div>
+
+          <div class="fabric-item">
+            <div class="fi-icon fi-indigo"><i class="fas fa-comments"></i></div>
+            <div class="fi-body">
+              <h3>Data Agent</h3>
+              <p>Lets teams build conversational Q&amp;A systems over governed data using plain-language questions. When a Data agent connects to the Ontology, answers reflect business terms rather than raw column names. Users ask <em>"What is our net exposure in retail this quarter?"</em> and the agent returns an answer anchored in the same definition Finance and Risk both agreed on.</p>
+            </div>
+          </div>
+
+          <div class="fabric-item">
+            <div class="fi-icon fi-rust"><i class="fas fa-robot"></i></div>
+            <div class="fi-body">
+              <h3>Operations Agent <span class="preview-tag">preview</span></h3>
+              <p>Monitors real-time data continuously against Ontology-defined rules and recommends or triggers governed actions without waiting to be asked.</p>
+            </div>
+          </div>
+
+          <div class="fabric-item">
+            <div class="fi-icon fi-navy"><i class="fas fa-chart-bar"></i></div>
+            <div class="fi-body">
+              <h3>Power BI Semantic Model</h3>
+              <p>The analytical model most teams already have. In Fabric IQ, an Ontology can be generated directly from an existing semantic model — which means the business definitions you have already built in Power BI become the starting point for the entire workload.</p>
+            </div>
+          </div>
+
+          <div class="fabric-item">
+            <div class="fi-icon fi-teal"><i class="fas fa-table"></i></div>
+            <div class="fi-body">
+              <h3>Plan <span class="preview-tag">preview</span></h3>
+              <p>Brings financial and operational planning into Fabric — budgets, forecasts, write-back, and approval workflows — built on the same semantic foundation and governed data the rest of the platform uses.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ─ Section 3 ─ -->
+        <h2>How the Items Work Together</h2>
+        <p>
+          The Ontology is declared once. Graph computes traversals across the relationships the Ontology defines. The Data agent answers questions using those entities and relationships. The Operations agent monitors live signals against the Ontology's rules. The semantic model feeds into or stays consistent with the Ontology. Plan connects historical performance and future intent on the same governed layer.
+        </p>
+        <div class="callout callout-tip">
+          <i class="fas fa-lightbulb"></i>
+          <span>You do not need all six items on day one. Most teams start by generating an Ontology from an existing Power BI semantic model, then extend into agents and planning as the use case demands.</span>
+        </div>
+
+        <!-- ─ Section 4 ─ -->
+        <h2>A Real-World Example of Where This Breaks Down</h2>
+        <p>
+          A bank running credit, retail, and treasury teams off separate data sources defines "Customer Exposure" differently across each function. Their AI agents produce conflicting risk summaries depending on which source they query.
+        </p>
+        <p>
+          Fabric IQ's Ontology lets the organisation define "Customer Exposure" once and enforce that definition across every downstream report, agent, and planning model that touches the concept. <strong>One definition. Zero reconciliation.</strong>
+        </p>
+
+        <!-- ─ Section 5 ─ -->
+        <h2>When to Start Evaluating Fabric IQ</h2>
+        <p>
+          Fabric IQ requires an existing Microsoft Fabric environment. Specific items — including Ontology and Plan — require tenant admin enablement in the Fabric admin portal before they can be created. Since Fabric IQ is in public preview as of the time of writing, teams should validate behaviour in non-production environments before applying it to governed reporting pipelines.
+        </p>
+        <p>
+          The clearest signal that your organisation is ready for Fabric IQ: your teams are getting inconsistent answers from the same data, or your AI agents are producing outputs that do not map to how the business actually defines its terms.
+        </p>
+
+        <!-- ─ Author CTA ─ -->
+        <div class="author-box">
+          <div class="author-avatar">LS</div>
+          <div class="author-info">
+            <strong>Logeshkumar Sivakumar</strong>
+            <span>BI Developer &amp; Microsoft Fabric Analytics Engineer (DP-600, DP-700)</span>
+            <p>If your team is seeing definition conflicts across Power BI reports, agents, or planning tools and you are evaluating whether Fabric IQ fits your stack, I would be interested to compare approaches.</p>
+            <div class="author-links">
+              <a href="https://www.linkedin.com/in/logeshkumar-sivakumar/" target="_blank" rel="noopener"><i class="fab fa-linkedin-in"></i> Connect on LinkedIn</a>
+              <a href="../index.html#contact"><i class="fas fa-envelope"></i> Get in Touch</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─ Series nav ─ -->
+        <div class="series-nav">
+          <div class="series-nav-header">
+            <i class="fas fa-layer-group"></i>
+            <strong>From Data to Intelligence: A Practitioner's Guide to Microsoft Fabric IQ</strong>
+          </div>
+          <ol class="series-list">
+            <li class="series-current"><span>Part 1</span> Data Is Unified. Meaning Is Not: Understanding Microsoft Fabric IQ <span class="series-badge current">You are here</span></li>
+            <li><span>Part 2</span> Ontology: The Semantic Foundation of Fabric IQ <span class="series-badge soon">Coming soon</span></li>
+            <li><span>Part 3</span> Graph: Relationship-Driven Compute in Fabric IQ <span class="series-badge soon">Coming soon</span></li>
+            <li><span>Part 4</span> Data Agent: Governed Q&amp;A Over Enterprise Data <span class="series-badge soon">Coming soon</span></li>
+            <li><span>Part 5</span> Operations Agent: Real-Time Monitoring and Actions <span class="series-badge soon">Coming soon</span></li>
+            <li><span>Part 6</span> Power BI Semantic Model in Fabric IQ <span class="series-badge soon">Coming soon</span></li>
+            <li><span>Part 7</span> Plan: Enterprise Planning on the Fabric Semantic Layer <span class="series-badge soon">Coming soon</span></li>
+          </ol>
+        </div>
+
+        <!-- ─ References ─ -->
+        <div class="references">
+          <h3><i class="fas fa-link"></i> References</h3>
+          <ul>
+            <li><a href="https://learn.microsoft.com/en-us/fabric/iq/overview" target="_blank" rel="noopener">What is Fabric IQ (preview)? — Microsoft Learn</a></li>
+            <li><a href="https://learn.microsoft.com/en-us/fabric/iq/ontology/overview" target="_blank" rel="noopener">What is ontology (preview)? — Microsoft Learn</a></li>
+            <li><a href="https://learn.microsoft.com/en-us/fabric/iq/plan/overview" target="_blank" rel="noopener">What is plan (preview)? — Microsoft Learn</a></li>
+          </ul>
+        </div>
+
+        <!-- ─ Tags ─ -->
+        <div class="blog-tags">
+          <span class="btag">FabricIQ</span>
+          <span class="btag">MicrosoftFabric</span>
+          <span class="btag">PowerBI</span>
+          <span class="btag">DataEngineering</span>
+          <span class="btag">BusinessIntelligence</span>
+          <span class="btag">AIAgents</span>
+          <span class="btag">DataGovernance</span>
+          <span class="btag">Analytics</span>
+          <span class="btag">FabricPlan</span>
+          <span class="btag">SemanticLayer</span>
+        </div>
+
+      </article>
+
+      <!-- SIDEBAR -->
+      <aside class="blog-sidebar">
+
+        <div class="sidebar-card toc-card">
+          <h4><i class="fas fa-list"></i> In This Article</h4>
+          <ul class="toc-list">
+            <li><a href="#" onclick="scrollTo('h2',0)">What is Fabric IQ?</a></li>
+            <li><a href="#" onclick="scrollTo('h2',1)">The Six Items</a></li>
+            <li><a href="#" onclick="scrollTo('h2',2)">How They Work Together</a></li>
+            <li><a href="#" onclick="scrollTo('h2',3)">A Real-World Example</a></li>
+            <li><a href="#" onclick="scrollTo('h2',4)">When to Evaluate</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-card series-card">
+          <h4><i class="fas fa-layer-group"></i> Series</h4>
+          <p class="series-name">From Data to Intelligence: A Practitioner's Guide to Microsoft Fabric IQ</p>
+          <span class="series-progress">Part 1 of 7</span>
+        </div>
+
+        <div class="sidebar-card share-card">
+          <h4><i class="fas fa-share-alt"></i> Share</h4>
+          <div class="share-links">
+            <a href="https://www.linkedin.com/in/logeshkumar-sivakumar/" target="_blank" rel="noopener" class="share-btn share-li"><i class="fab fa-linkedin-in"></i> LinkedIn</a>
+            <a href="mailto:?subject=Interesting article on Microsoft Fabric IQ&body=Check out this article: Data Is Unified. Meaning Is Not — https://logeshkumar.dev/blogs/blog-01-fabric-iq-overview.html" class="share-btn share-mail"><i class="fas fa-envelope"></i> Email</a>
+          </div>
+        </div>
+
+        <div class="sidebar-card certs-card">
+          <h4><i class="fas fa-certificate"></i> Author Credentials</h4>
+          <div class="sidebar-cert"><span class="cert-dot navy"></span> DP-600 Fabric Analytics Engineer</div>
+          <div class="sidebar-cert"><span class="cert-dot teal"></span> DP-700 Fabric Data Engineer</div>
+        </div>
+
+      </aside>
+    </div>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer id="footer">
+    <div class="container">
+      <div class="footer-top">
+        <a href="../index.html" class="footer-logo">
+          <span class="logo-bracket">&lt;</span>LS<span class="logo-bracket">/&gt;</span>
+        </a>
+        <p class="footer-tagline">BI &amp; Analytics Engineer · Microsoft Fabric Specialist · Pre-Sales Consultant</p>
+        <div class="footer-socials">
+          <a href="https://www.linkedin.com/in/logeshkumar-sivakumar/" target="_blank" rel="noopener"><i class="fab fa-linkedin-in"></i></a>
+          <a href="https://github.com/Logeshkumar-10" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
+          <a href="https://mavenshowcase.com/profile/68412380-5091-70e5-c195-c8a36727fc9a" target="_blank" rel="noopener"><i class="fas fa-chart-bar"></i></a>
+          <a href="mailto:elogu2001@outlook.com"><i class="fas fa-envelope"></i></a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Logeshkumar Sivakumar. All rights reserved.</span>
+        <span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Minimal nav scroll for blog page
+    const navbar = document.getElementById('navbar');
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+    window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 20));
+    hamburger.addEventListener('click', () => { hamburger.classList.toggle('open'); navLinks.classList.toggle('open'); });
+    navLinks.querySelectorAll('a').forEach(l => l.addEventListener('click', () => { hamburger.classList.remove('open'); navLinks.classList.remove('open'); }));
+
+    // TOC scroll helper
+    function scrollTo(tag, idx) {
+      const els = document.querySelectorAll('.blog-article ' + tag);
+      if (els[idx]) { event.preventDefault(); els[idx].scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    }
+
+    // Active TOC highlighting
+    const tocLinks = document.querySelectorAll('.toc-list a');
+    const headings = document.querySelectorAll('.blog-article h2');
+    window.addEventListener('scroll', () => {
+      let active = 0;
+      headings.forEach((h, i) => { if (window.scrollY + 120 >= h.offsetTop) active = i; });
+      tocLinks.forEach((l, i) => l.classList.toggle('toc-active', i === active));
+    });
+  </script>
+</body>
+</html>

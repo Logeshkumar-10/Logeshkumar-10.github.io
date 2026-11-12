@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Four Delta Maintenance Operations That Separate Building a Pipeline from Running One | Logeshkumar Sivakumar</title>
+  <meta name="description" content="A report that flew last month crawls today. Nothing upstream changed, the query is the same, yet every refresh drags. Most Microsoft Fabric practitioners h" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">LS</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Fabric Foundations · Part 5</span>
+    <h1>The Four Delta Maintenance Operations That Separate Building a Pipeline from Running One</h1>
+    <p class="muted">Logeshkumar Sivakumar · September 9, 2026 · 5 min read</p>
+    <img class="cover" src="../assets/blog/fabric-foundations-5/cover.jpg" width="1200" height="675" alt="" />
+<p>A report that flew last month crawls today. Nothing upstream changed, the query is the same, yet every refresh drags. Most Microsoft Fabric practitioners hit this and start rewriting the query or blaming the capacity, when the cause is almost always physical: the Delta table quietly filled with small files, or nobody ever ran maintenance on it.</p>
+<p>That is the line between someone who can build a pipeline and someone who can run one in production. This is the <strong>Microsoft Fabric Delta table maintenance</strong> toolkit, and four operations are worth knowing cold: <strong>OPTIMIZE, V-Order, Z-Order, and VACUUM</strong>.</p>
+<h2>Why does a Delta table get slower over time?</h2>
+<p>Delta never edits a Parquet file in place. Every write lands new files and marks the old ones obsolete. Streaming micro-batches and frequent small appends make that worse fast, and you end up with thousands of tiny files. Reads then pay for it, because the engine opens every file, reads every footer, and loses the efficiency of a large scan. That is the small-files problem.</p>
+<h2>What OPTIMIZE does and when to run it</h2>
+<p>OPTIMIZE is the fix. OPTIMIZE is a Spark SQL command that <strong>rewrites many small Parquet files into fewer larger ones</strong>, without changing your data, only its physical layout. Target file size sits in the hundreds of MB up to roughly 1 GB, though verify the current default before quoting it.</p>
+<pre><code>%%sql
+OPTIMIZE gold_region_category;</code></pre>
+<p>Run it after heavy ingestion, or when DESCRIBE DETAIL shows the file count climbing. One caveat that trips people up: OPTIMIZE is a Spark operation, so you cannot run it from the read-only SQL analytics endpoint or the Warehouse editor. The file count before versus after is the whole point in a single number.</p>
+<h2>What is V-Order, and what does it cost?</h2>
+<p>V-Order is a Fabric <strong>write-time optimization</strong> that reorganises the Parquet layout, its sorting, encoding, and compression, so downstream reads are faster across Fabric engines while the files stay open-source Parquet compliant. The catch is the write. You pay roughly 15% slower writes on average in exchange for better compression and faster reads. I am not fully certain of the exact percentages, so treat these as approximate.</p>
+<p>Who it helps decides whether you turn it on. Power BI Direct Lake sees large read gains on cold-cache queries. A read-heavy SQL endpoint or Warehouse sees a smaller lift, roughly 10%. Spark gets no read benefit and just eats the slower write, so skip V-Order on Spark-only, write-heavy staging tables. Enable it for Direct Lake, skip it for staging.</p>
+<h2>How is Z-Order different from V-Order?</h2>
+<p>They answer different questions. <strong>Z-Order clusters rows</strong> that share values in the columns you choose so they land in the same files, which improves data skipping for queries that filter on those columns. You apply Z-Order inside OPTIMIZE, and you can stack it with V-Order in one command.</p>
+<pre><code>%%sql
+OPTIMIZE sales WHERE order_date &gt;= '2026-01-01'
+ZORDER BY (customer_id) VORDER;</code></pre>
+<p>Use <strong>V-Order broadly for cross-engine reads</strong>. Use <strong>Z-Order narrowly, on the one or two high-cardinality columns your queries actually filter by</strong>. Do not Z-Order by a long list of columns, because effectiveness drops off fast as you add more.</p>
+<h2>The VACUUM rule that breaks Direct Lake reports</h2>
+<p>Because Delta keeps old files for time travel, storage grows, and VACUUM reclaims it. VACUUM removes data files no longer referenced by the current table that are older than a retention threshold, defaulting to 7 days.</p>
+<p>Here is the part that costs people an afternoon. Set retention below 7 days and you can break time travel, and worse, break a Direct Lake semantic model that references a specific committed version. VACUUM deletes the Parquet files that model still points to, and the report starts erroring because the files are gone. Fabric rejects sub-7-day retention by default for exactly this reason. Run VACUUM after your compaction cycles, keep the default window, and only override it if you fully understand the consequence.</p>
+<h2>Why an update runs fast, then OPTIMIZE cleans up</h2>
+<p>Deletes and updates used to be expensive for the same reason: removing a few rows meant rewriting the whole file they lived in. <strong>Deletion vectors</strong> change that. A deletion vector marks rows as deleted without rewriting the file, a merge-on-read optimization, so the change commits fast. The rows are still physically there; Delta just carries a note to ignore them on read. A later OPTIMIZE physically removes them and rewrites the file clean. You do not manage deletion vectors by hand. Knowing the mechanism is enough: it explains both the fast update and why OPTIMIZE tidies up afterwards.</p>
+<figure><img src="../assets/blog/fabric-foundations-5/image1.jpg" alt="" loading="lazy"><figcaption>Maintenance in Lakehouse Table</figcaption></figure>
+<h2>How do you run all of this on a schedule?</h2>
+<p>Three ways, mapping to how much control you want. Ad hoc: right-click a table in the Lakehouse, choose <strong>Maintenance</strong>, and run OPTIMIZE (with optional V-Order) and <strong>VACUUM </strong>from the UI. In code: put OPTIMIZE and VACUUM in a notebook or Spark job definition, alongside your other transformation steps. <strong>Scheduled</strong>: the Lakehouse Maintenance activity inside a <strong>Data Factory pipeline</strong>, chained after your load steps so maintenance runs on a cadence right after ingestion.</p>
+<p>The pattern that holds up: load, then <strong>OPTIMIZE</strong>, then <strong>VACUUM </strong>on a weekly cadence, all in one pipeline. So the next time a table crawls, do not rewrite the query first. <strong>Run DESCRIBE DETAIL,</strong> look at the file count, and you will usually have your answer before you have finished reading the log.</p>
+<p><strong>Previous in this series:</strong> <a href="https://www.linkedin.com/pulse/what-your-delta-tables-actually-parquet-internals-log-sivakumar-eg38c/?trackingId=H6%2BpBOnrRmqB60XmcxuDlQ%3D%3D" target="_blank" rel="noopener"><strong>What Your Delta Tables Actually Are: Parquet Internals and the Transaction Log in Microsoft Fabric</strong></a></p>
+<h2>Next in this series:</h2>
+<h2>References:</h2>
+<ul><li>Delta Lake table optimization and V-Order (Microsoft Fabric) - <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-optimization-and-v-order?tabs=sparksql" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a></li><li>Run Delta Lake table maintenance in the Fabric Lakehouse - <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-table-maintenance" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a></li><li>Use table maintenance to manage Delta tables in Microsoft Fabric - <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-table-maintenance?tabs=sparksql" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a></li></ul>
+<p>#DeltaLake #VOrder #ZOrder #MicrosoftFabric #DataEngineering #Lakehouse #DirectLake #PowerBI</p>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>
