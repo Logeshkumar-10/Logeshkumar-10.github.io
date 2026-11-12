@@ -140,3 +140,5 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 .caps b { display: block; font-size: 40px; line-height: 1; font-weight: 800; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .caps h3 { margin: 10px 0 8px; font-size: 18px; }
 .caps p { font-size: 15px; color: var(--ink2); line-height: 1.55; }
+/* section backgrounds follow page order so neighbours always differ: hero lav, then mint, peach, sky, lav, mint, peach, sky, lav, mint */
+#ai{background:var(--mint)}#projects{background:var(--peach)}#experience{background:var(--sky)}#skills{background:var(--lav)}#credentials{background:var(--mint)}#writing{background:var(--peach)}#college{background:var(--sky)}#about{background:var(--lav)}#contact{background:var(--mint)}
