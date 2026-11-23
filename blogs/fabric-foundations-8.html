@@ -10,14 +10,14 @@
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
-  <nav aria-label="Main"><div class="wrap">
+  <nav aria-label="Main" class="top"><div class="wrap">
     <a href="../index.html" class="logo">Logeshkumar Sivakumar</a>
     <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
   </div></nav>
   <main id="main"><article class="wrap post-body">
     <span class="eyebrow">Fabric Foundations · Part 8</span>
     <h1>Microsoft Fabric Mirroring: Stop Building Pipelines for Data You Only Need to Copy</h1>
-    <p class="muted">Logeshkumar Sivakumar · 3 min read</p>
+    <p class="muted">Logeshkumar Sivakumar · November 22, 2026 · 3 min read</p>
     <img class="cover" src="../assets/blog/fabric-foundations-8/cover.jpg" width="1200" height="675" alt="" />
 <p>Most Microsoft Fabric migration meetings open the same way. Someone sketches a dozen pipelines on a whiteboard, one per source system, before anyone asks whether each source needs a pipeline at all.</p>
 <p><a href="https://www.linkedin.com/company/microsoftfabric/" target="_blank" rel="noopener"><strong>Microsoft Fabric</strong></a> mirroring continuously replicates an existing database into OneLake as open Delta tables, with no ETL to build or maintain. That one idea changes the first question in a project. It stops being "how do we write these pipelines?" and becomes "which sources actually need one?"</p>
