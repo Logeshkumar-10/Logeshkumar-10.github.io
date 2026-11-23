@@ -211,3 +211,25 @@ html { scroll-padding-bottom: var(--dock); }
 
 /* the hero fills the first screen only on wide landscape windows; on tall phone screens (even in desktop-site mode) it would leave blank bands above and below */
 @media (min-width: 981px) and (orientation: landscape) { #hero { min-height: calc(100vh - 60px); } }
+
+/* whole card opens its content: the title link is stretched over the card, the visible "go" label is just a hint */
+.card:has(.stretch) { position: relative; transition: box-shadow .2s, transform .2s; }
+.stretch { color: var(--ink); text-decoration: none; }
+.stretch::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: var(--r); }
+.card:has(.stretch):hover { box-shadow: 0 14px 34px rgba(80, 60, 120, .18); transform: translateY(-2px); }
+.card:has(.stretch):hover .stretch { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.card:has(.stretch:focus-visible) { outline: 3px solid var(--accent); outline-offset: 3px; }
+.stretch:focus-visible { outline: none; }
+.go { font-weight: 700; color: var(--accent); margin-top: auto; padding-top: 6px; }
+.go::after { content: " \2192"; }
+@media (prefers-reduced-motion: reduce) { .card:has(.stretch):hover { transform: none; } }
+
+/* short laptop screens: tighten the intro so the buttons stay on the first screen */
+@media (min-width: 981px) and (max-height: 780px) {
+  #hero { padding-top: 28px; }
+  h1 { font-size: clamp(34px, 3.5vw, 44px); }
+  .who { margin-bottom: 16px; }
+  .hero p.tag { font-size: 18px; }
+  .hire { margin-top: 14px; }
+  .hero .cta { margin: 20px 0; }
+}
