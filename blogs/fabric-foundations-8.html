@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Microsoft Fabric Mirroring: Stop Building Pipelines for Data You Only Need to Copy | Logeshkumar Sivakumar</title>
+  <meta name="description" content="Most Microsoft Fabric migration meetings open the same way. Someone sketches a dozen pipelines on a whiteboard, one per source system, before anyone asks w" />
+  <link rel="stylesheet" href="../css/style.css?v=3" />
+  <link rel="stylesheet" href="../css/article.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav aria-label="Main"><div class="wrap">
+    <a href="../index.html" class="logo">Logeshkumar Sivakumar</a>
+    <ul><li><a href="../index.html">Home</a></li><li><a href="../index.html#projects">Projects</a></li><li><a href="../index.html#writing">Writing</a></li><li><a href="../index.html#contact">Contact</a></li></ul>
+  </div></nav>
+  <main id="main"><article class="wrap post-body">
+    <span class="eyebrow">Fabric Foundations · Part 8</span>
+    <h1>Microsoft Fabric Mirroring: Stop Building Pipelines for Data You Only Need to Copy</h1>
+    <p class="muted">Logeshkumar Sivakumar · 3 min read</p>
+    <img class="cover" src="../assets/blog/fabric-foundations-8/cover.jpg" width="1200" height="675" alt="" />
+<p>Most Microsoft Fabric migration meetings open the same way. Someone sketches a dozen pipelines on a whiteboard, one per source system, before anyone asks whether each source needs a pipeline at all.</p>
+<p><a href="https://www.linkedin.com/company/microsoftfabric/" target="_blank" rel="noopener"><strong>Microsoft Fabric</strong></a> mirroring continuously replicates an existing database into OneLake as open Delta tables, with no ETL to build or maintain. That one idea changes the first question in a project. It stops being "how do we write these pipelines?" and becomes "which sources actually need one?"</p>
+<h2>What are the three types of mirroring in Microsoft Fabric?</h2>
+<p><strong>Database mirroring</strong> physically copies databases and tables into OneLake from sources like Azure SQL Database, Snowflake or Cosmos DB. <strong>Metadata mirroring</strong> syncs only catalog names, schemas and tables, and uses OneLake shortcuts so the data stays at the source. <strong>Open mirroring</strong> lets any developer or partner write change data into a mirrored database item using the open Delta format and public APIs.</p>
+<p>Most people only know the first. The third matters more than it sounds. If a source has no native connector, the answer is not automatically a custom pipeline. Partner tools such as Qlik Replicate, Striim and Simplement already write into open mirroring.</p>
+<h2>How does Microsoft Fabric mirroring work without loading the source?</h2>
+<p>Replication starts with a snapshot of each table, then streams inserts, updates and deletes into OneLake as Delta Parquet. The change detection method differs by source. Analytical queries run against the OneLake copy, so the production database never sees them.</p>
+<p>Setting up a mirror creates three things in the workspace: a replication process, a mirrored database item, and a read-only SQL analytics endpoint over the Delta tables. You define views and query. Writes stay at the source.</p>
+<h2>Mirroring vs shortcut vs pipeline: how do you choose?</h2>
+<p>Use a <strong>shortcut </strong>when the data already sits somewhere OneLake can reach, like ADLS or S3, and you want live read-only access with no change capture. <strong>Mirror </strong>when the source is an operational database and you want continuous change data capture as an analytics-ready replica. Build a pipeline when you need real transformation, business logic or orchestration.</p>
+<p>Mirroring is replication, not transformation. You get a faithful copy, so cleaning and modelling still belong in your medallion layers. My default is to mirror for the raw layer, then spend pipeline effort only where the transformation is real.</p>
+<h2>What goes wrong with Microsoft Fabric mirroring in production?</h2>
+<p>Retention catches people first. Mirroring runs vacuum automatically, and for mirrored databases created in the portal after mid-June 2025 the default retention is one day. If a stakeholder wants 30 days of history, check the setting before promising anything. It sits under Settings, Delta table management, or in the API as retentionInDays.</p>
+<p>Capacity pauses come next. Pausing and resuming a capacity puts replication into a Paused state, and no data replicates while the capacity is paused. Routine cost-saving pauses mean stale data and a catch-up afterwards.</p>
+<p>Then there is Mirror all data, the default option. It also mirrors any table created later. Storage for replicas is free up to a limit based on capacity size, and you pay OneLake rates beyond that. Picking tables deliberately is the habit that separates a tidy estate from a junk drawer.</p>
+<p>Next time a migration conversation opens with a dozen pipelines, ask which ones are really just copies. Subscribe to Fabric Foundations for the next breakdown in this series.</p>
+<h2>Previous in this series: Fabric Warehouse: What it is for, and when read-only stops being enough</h2>
+<h2>References:</h2>
+<ul><li>What is Mirroring in Fabric?<a href="https://learn.microsoft.com/fabric/mirroring/overview" target="_blank" rel="noopener"><strong> learn.microsoft.com</strong></a></li><li>Monitor Fabric mirrored database replication: <a href="http://learn.microsoft.com/" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a></li><li>Open mirroring partner ecosystem: <a href="https://learn.microsoft.com/fabric/mirroring/open-mirroring-partners-ecosystem" target="_blank" rel="noopener"><strong>learn.microsoft.com</strong></a></li></ul>
+    <p class="back"><a href="../index.html#writing">Back to all articles</a></p>
+  </article></main>
+  <footer><div class="wrap"><span>© 2026 Logeshkumar Sivakumar</span><span>BI and Analytics Engineer · Microsoft Fabric · Power BI</span></div></footer>
+</body>
+</html>
